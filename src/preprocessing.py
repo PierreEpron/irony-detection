@@ -5,7 +5,7 @@ def make_line(values, equality):
     line = values.iloc[0,3:10].values.tolist()
     labels = values.label.value_counts()
 
-    if not equality and len(labels)>1 and labels[0] == labels[1]:
+    if not equality and len(labels)>1 and labels.iloc[0] == labels.iloc[1]:
         return None
     
     label = 1 if labels.idxmax()=='iro' else 0
