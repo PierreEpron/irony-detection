@@ -1,6 +1,7 @@
 import pandas as pd
+import random
 
-def make_line(values:pd.DataFrame, equality:bool):
+def make_line(values:pd.DataFrame, equality):
     """
         Returns a list of values based on a dataframe containing annotation for one Post/Reply pair.
 
@@ -17,10 +18,19 @@ def make_line(values:pd.DataFrame, equality:bool):
     line = values.iloc[0,3:10].values.tolist() #keep the values that are shared
     labels = values.label.value_counts()
 
-    if not equality and len(labels)>1 and labels[0] == labels[1]: #if equalities are not kept and this is an equality
-        return None
+    if len(labels)>1 and labels[0] == labels[1]: #if this is an equality 
+        if not equality: #if equalities are not kept
+            return None
+        elif equality=='iro': #if equalities default to irony
+            label = 1
+        elif equality=='not': #if equalities default to not irony
+            label = 0
+        elif equality: #if equalities are kept
+            label = random.randint(0, 1)
+    else: #if this is not an equality
+        label = 1 if labels.idxmax()=='iro' else 0 #set the label to 1 if text is irony and 0 otherwise
     
-    label = 1 if labels.idxmax()=='iro' else 0 #set the label to 1 if text is irony and 0 otherwise
+    
     line.append(label)
     
     return line
