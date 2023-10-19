@@ -18,7 +18,7 @@ def make_line(values:pd.DataFrame, equality):
     line = values.iloc[0,3:10].values.tolist() #keep the values that are shared
     labels = values.label.value_counts()
 
-    if len(labels)>1 and labels[0] == labels[1]: #if this is an equality 
+    if len(labels)>1 and labels.iloc[0] == labels.iloc[1]: #if this is an equality 
         if not equality: #if equalities are not kept
             return None
         elif equality=='iro': #if equalities default to irony
