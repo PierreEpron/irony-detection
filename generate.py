@@ -6,8 +6,11 @@ from src.preprocessing import make_dataset
 from tqdm import tqdm
 import json
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
-TOKEN = "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"
+TOKEN = os.getenv('HF_TOKEN')
 DATASET_NAME = "CreativeLang/EPIC_Irony"
 DEVICE = "cuda"
 
