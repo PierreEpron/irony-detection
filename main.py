@@ -5,7 +5,7 @@ import sys
 
 from src.utils import write_jsonl
 
-from preprocessing import make_dataset
+from src.preprocessing import make_dataset, iter_splits
 from src.model import load_cls_model, cls_inference
 
 mode = sys.argv[1]
@@ -13,6 +13,7 @@ mode = sys.argv[1]
 DATASET_NAME = "CreativeLang/EPIC_Irony"
 CLS_MODEL_NAME = "cardiffnlp/twitter-roberta-base-irony"
 CLS_RESULT_PATH = "cls_roberta-irony_zs.jsonl"
+SPLITS_PATH = "./results/splits.jsonl"
 
 if mode == 'cls_inf':
     
@@ -20,9 +21,15 @@ if mode == 'cls_inf':
     model = load_cls_model(CLS_MODEL_NAME)
 
     # Change when cv usable
-    data = Dataset.from_pandas(make_dataset(pd.DataFrame(load_dataset(DATASET_NAME)['train'])))
+    df = make_dataset(pd.DataFrame(load_dataset(DATASET_NAME)['train']))
 
-    results = cls_inference(tokenizer, model)
+    results = []
+    current_split = 1
+
+    for _, _, test in iter_splits(SPLITS_PATH, df):
+        print(f'##### {current_split} #####')
+        results.append(cls_inference(tokenizer, model))
+        current_split+=1
     
     write_jsonl(CLS_RESULT_PATH, results)
 
