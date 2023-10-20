@@ -18,7 +18,7 @@ SPLITS_PATH = "./results/splits.jsonl"
 if mode == 'cls_inf':
     
     tokenizer = AutoTokenizer.from_pretrained(CLS_MODEL_NAME)
-    model = load_cls_model(CLS_MODEL_NAME)
+    model = load_cls_model(CLS_MODEL_NAME, method="cuda")
 
     # Change when cv usable
     df = make_dataset(pd.DataFrame(load_dataset(DATASET_NAME)['train']))
