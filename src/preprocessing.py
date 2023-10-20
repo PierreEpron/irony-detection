@@ -1,6 +1,10 @@
 import pandas as pd
 import random
 
+from src.tokenizer import cls_tokenize
+
+from sklearn.model_selection import StratifiedShuffleSplit
+
 def make_line(values:pd.DataFrame, equality):
     """
         Returns a list of values based on a dataframe containing annotation for one Post/Reply pair.
@@ -63,3 +67,30 @@ def make_dataset(dataset, n_annotators=None, equality=False) -> pd.DataFrame:
             tab_majority_decision.append(line)
             
     return pd.DataFrame(tab_majority_decision, columns=dataset.columns[3:10].tolist()+['label'])
+
+def filter_dataset(df, tokenizer, max_token=514):
+
+    df['n_tokens'] = df.apply(lambda x: len(cls_tokenize(tokenizer, x.parent_text, x.text).input_ids), axis = 1).squeeze()
+
+    return df[df.n_tokens<max_token]
+
+def split_dataset(df, n_splits=5, test_size=0.4, train_size=0.6, random_state=0):
+
+    sss = StratifiedShuffleSplit(n_splits=n_splits, test_size=test_size, train_size=train_size, random_state=random_state)
+
+    list_comp = []
+    for train, val_test in sss.split(df,df.label):
+        df_val_test = df.iloc[val_test]
+
+        val_iro = df_val_test[df_val_test.label==1][::2].id_original.to_list()
+        test_iro = df_val_test[df_val_test.label==1][1::2].id_original.to_list()
+
+        val_not_iro = df_val_test[df_val_test.label==0][::2].id_original.to_list()
+        test_not_iro = df_val_test[df_val_test.label==0][1::2].id_original.to_list()
+        
+        test = test_iro+test_not_iro
+        val = val_iro+val_not_iro
+
+        list_comp.append({'train':df.iloc[train].id_original.tolist(),'val':val,'test':test})
+
+    return list_comp
