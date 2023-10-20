@@ -1,8 +1,6 @@
 import torch
 from transformers import AutoModelForSequenceClassification, AutoModelForCausalLM
-from pathlib import Path
 from tqdm import tqdm
-import json
 
 from src.tokenizer import cls_tokenize
 
@@ -34,7 +32,7 @@ def load_clm_acc_model(model_name):
 def load_clm_cuda_model(model_name):
     return AutoModelForCausalLM.from_pretrained(model_name).to('cuda')
 
-def cls_inference(tokenizer, model, data, result_path):
+def cls_inference(tokenizer, model, data):
 
     results = []
 
@@ -44,8 +42,6 @@ def cls_inference(tokenizer, model, data, result_path):
     with torch.no_grad():
         for item in tqdm(data, 'CLS inference loop'):
             tokens = cls_tokenize(tokenizer, item['parent_text'], item['text'], return_tensors='pt').to(model.device)
-            if tokens['input_ids'].shape[-1] > 514:
-                continue
             outputs = model(**tokens)
             scores = softmax(outputs.logits).detach().cpu().numpy()
             results.append({
@@ -53,5 +49,5 @@ def cls_inference(tokenizer, model, data, result_path):
                 'scores': scores[0].tolist(),
                 'pred': int(scores.argmax()),
             })
-
-    Path(result_path).write_text(json.dumps(results))
+            
+    return results
