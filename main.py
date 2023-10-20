@@ -27,8 +27,8 @@ if mode == 'cls_inf':
     current_split = 1
 
     for _, _, test in iter_splits(SPLITS_PATH, df):
-        print(f'##### {current_split} #####')
-        results.append(cls_inference(tokenizer, model))
+        print(f'##### Starting split: {current_split} #####')
+        results.append(cls_inference(tokenizer, model, test))
         current_split+=1
     
     write_jsonl(CLS_RESULT_PATH, results)
