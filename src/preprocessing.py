@@ -5,6 +5,8 @@ from src.tokenizer import cls_tokenize
 
 from sklearn.model_selection import StratifiedShuffleSplit
 
+from src.utils import read_jsonl
+
 def make_line(values:pd.DataFrame, equality):
     """
         Returns a list of values based on a dataframe containing annotation for one Post/Reply pair.
@@ -94,3 +96,11 @@ def split_dataset(df, n_splits=5, test_size=0.4, train_size=0.6, random_state=0)
         list_comp.append({'train':df.iloc[train].id_original.tolist(),'val':val,'test':test})
 
     return list_comp
+
+def recover_split(split, df):
+    return df[df['id_original'].isin(split)].to_dict(orient='records')
+
+def iter_splits(splits_path, df):
+    splits = read_jsonl(splits_path)
+    for split in splits:
+        yield recover_split(split['train'], df), recover_split(split['val'], df), recover_split(split['test'], df)
