@@ -12,7 +12,7 @@ mode = sys.argv[1]
 
 DATASET_NAME = "CreativeLang/EPIC_Irony"
 CLS_MODEL_NAME = "cardiffnlp/twitter-roberta-base-irony"
-CLS_RESULT_PATH = "cls_roberta-irony_zs.jsonl"
+CLS_RESULT_PATH = "./results/cls_roberta-irony_zs.jsonl"
 SPLITS_PATH = "./results/splits.jsonl"
 
 if mode == 'cls_inf':
