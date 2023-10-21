@@ -51,9 +51,8 @@ elif mode == 'cls_train':
 
         current_path = f'{CLS_MODEL_PATH}-{current_split}'
         
-        cls_train(tokenizer, model, train, val, current_path)
+        model = cls_train(tokenizer, model, train, val, current_path)
         
-        model = load_cls_model(current_path, method="cuda")
         results.append(cls_inference(tokenizer, model, test))
         
         write_jsonl(CLS_RESULT_PATH, results)

@@ -92,3 +92,5 @@ def cls_train(tokenizer, model, train, val, output_dir):
     )
 
     trainer.train()
+
+    return trainer.model
