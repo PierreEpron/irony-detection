@@ -105,7 +105,7 @@ def clm_inference(tokenizer, model, data, prompt, system_prompt, instruct_prompt
 
     with torch.no_grad():
         for item in tqdm(data, 'CLM inference loop'):
-            input_ids = clm_tokenize(tokenizer, prompt, system_prompt, instruct_prompt, item, return_tensors='pt')
+            input_ids = clm_tokenize(tokenizer, prompt, system_prompt, instruct_prompt, item, return_tensors='pt').to(model.device)
             
             outputs = model.generate(
                 input_ids=input_ids,
