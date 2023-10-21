@@ -74,7 +74,7 @@ def cls_train(tokenizer, model, train, val, output_dir):
         num_train_epochs=10,
         save_strategy='epoch',
         save_total_limit=1,
-        metric_for_best_model="accuracy"
+        metric_for_best_model="accuracy",
         optim='adamw_torch',
         load_best_model_at_end=True
     )
