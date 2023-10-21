@@ -4,35 +4,35 @@ from datasets import Dataset
 from tqdm import tqdm
 import evaluate
 
-from src.tokenizer import cls_tokenize
+from src.tokenizer import clm_tokenize, cls_tokenize
 
-def load_cls_model(model_name, method='acc'):
+def load_cls_model(model_name, method='acc', **kwargs):
     if method == 'acc':
-        return load_cls_acc_model(model_name)
+        return load_cls_acc_model(model_name, **kwargs)
     elif method == 'cuda':
-        return load_cls_cuda_model(model_name)
+        return load_cls_cuda_model(model_name, **kwargs)
     else:
         raise ValueError(f"method should be equal to 'acc' or ''cuda' not '{method}'")
     
-def load_clm_model(model_name, method='acc'):
+def load_clm_model(model_name, method='acc', **kwargs):
     if method == 'acc':
-        return load_clm_acc_model(model_name)
+        return load_clm_acc_model(model_name, **kwargs)
     elif method == 'cuda':
-        return load_clm_cuda_model(model_name)
+        return load_clm_cuda_model(model_name, **kwargs)
     else:
         raise ValueError(f"method should be equal to 'acc' or ''cuda' not '{method}'")
 
-def load_cls_acc_model(model_name):
-    return AutoModelForSequenceClassification.from_pretrained(model_name, device_map="auto")
+def load_cls_acc_model(model_name, **kwargs):
+    return AutoModelForSequenceClassification.from_pretrained(model_name, device_map="auto", **kwargs)
 
-def load_cls_cuda_model(model_name):
-    return AutoModelForSequenceClassification.from_pretrained(model_name).to('cuda')
+def load_cls_cuda_model(model_name, **kwargs):
+    return AutoModelForSequenceClassification.from_pretrained(model_name, **kwargs).to('cuda')
 
-def load_clm_acc_model(model_name):
-    return AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+def load_clm_acc_model(model_name, **kwargs):
+    return AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", **kwargs)
 
-def load_clm_cuda_model(model_name):
-    return AutoModelForCausalLM.from_pretrained(model_name).to('cuda')
+def load_clm_cuda_model(model_name, **kwargs):
+    return AutoModelForCausalLM.from_pretrained(model_name, **kwargs).to('cuda')
 
 def cls_inference(tokenizer, model, data):
 
@@ -96,3 +96,28 @@ def cls_train(tokenizer, model, train, val, output_dir):
     trainer.save_state()
 
     return trainer.model
+
+def clm_inference(tokenizer, model, data, prompt, system_prompt, instruct_prompt):
+    
+    results = []
+
+    model.eval()
+
+    with torch.no_grad():
+        for item in tqdm(data, 'CLM inference loop'):
+            tokens = clm_tokenize(tokenizer, prompt, system_prompt, instruct_prompt, item, return_tensors='pt')
+            
+            outputs = model.generate(
+                input_ids=tokens['input_ids'],
+                max_new_tokens=16,
+                do_sample=True,
+            )
+
+            results.append({
+                'id_original': item['id_original'],
+                'gold':item['label'],
+                'output': tokenizer.decode(outputs[0], skip_special_tokens=True)
+            })
+            
+    return results
+   

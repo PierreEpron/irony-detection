@@ -1,17 +1,20 @@
 from transformers import AutoTokenizer
-from datasets import load_dataset, Dataset
+from datasets import load_dataset
+from dotenv import load_dotenv
 import pandas as pd
 import torch
 import sys
+import os
 
+from src.model import clm_inference, cls_train, load_cls_model, cls_inference
+from src.preprocessing import make_dataset, iter_splits
 from src.utils import write_jsonl
 
-from src.preprocessing import make_dataset, iter_splits
-from src.model import cls_train, load_cls_model, cls_inference
-
-mode = sys.argv[1]
+load_dotenv()
+HF_TOKEN = os.getenv('HF_TOKEN')
 
 DATASET_NAME = "CreativeLang/EPIC_Irony"
+SPLITS_PATH = "results/splits.jsonl"
 
 # CLS_MODEL_NAME = "cardiffnlp/twitter-roberta-base-irony"
 # CLS_MODEL_PATH = "results/roberta-irony-ft"
@@ -21,7 +24,14 @@ CLS_MODEL_NAME = "roberta-base"
 CLS_MODEL_PATH = "results/roberta-base-ft"
 CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
 
-SPLITS_PATH = "results/splits.jsonl"
+CLM_MODEL_NAME = 'meta-llama/Llama-2-7b-hf'
+CLM_RESULT_PATH = "results/clm_llama_0.jsonl"
+
+PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nQUESTION:\n{instruct_prompt}\nINPUT:\n - {parent_text} \n - {text} [/INST]\nANSWER: "
+SYSTEM_PROMPT = 'Answer to the following question with only one word'
+INSTRUCT_PROMPT = "Is the following input exchange ironic?"
+
+mode = sys.argv[1]
 
 if mode == 'cls_inf':
     
@@ -37,6 +47,7 @@ if mode == 'cls_inf':
         torch.cuda.empty_cache()
 
         print(f'##### Starting split: {current_split} #####')
+        
         results.append(cls_inference(tokenizer, model, test))
         current_split+=1
     
@@ -65,5 +76,24 @@ elif mode == 'cls_train':
         
         current_split+=1
 
+elif mode == 'clm_inf':
+
+    tokenizer = AutoTokenizer.from_pretrained(CLM_MODEL_NAME, token=HF_TOKEN)
+    model = load_cls_model(CLM_MODEL_NAME, method="cuda", token=HF_TOKEN)
+    
+    df = make_dataset(pd.DataFrame(load_dataset(DATASET_NAME)['train']))
+    
+    results = []
+    current_split = 1
+    
+    for _, _, test in iter_splits(SPLITS_PATH, df):
+        torch.cuda.empty_cache()
+        
+        print(f'##### Starting split: {current_split} #####')
+        
+        results.append(clm_inference(tokenizer, model, test, PROMPT, SYSTEM_PROMPT, INSTRUCT_PROMPT))
+        current_split+=1
+    
+
 else:
-    raise ValueError(f"mode possible values are: 'cls_inf, cls_train'. {mode} is not recognized")
+    raise ValueError(f"mode possible values are: 'cls_inf, cls_train, clm_inf'. {mode} is not recognized")
