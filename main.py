@@ -13,13 +13,13 @@ mode = sys.argv[1]
 
 DATASET_NAME = "CreativeLang/EPIC_Irony"
 
-CLS_MODEL_NAME = "cardiffnlp/twitter-roberta-base-irony"
-CLS_MODEL_PATH = "results/roberta-irony-ft"
-CLS_RESULT_PATH = "results/cls_roberta-irony_ft.jsonl"
+# CLS_MODEL_NAME = "cardiffnlp/twitter-roberta-base-irony"
+# CLS_MODEL_PATH = "results/roberta-irony-ft"
+# CLS_RESULT_PATH = "results/cls_roberta-irony_ft.jsonl"
 
-# CLS_MODEL_NAME = "roberta-base"
-# CLS_MODEL_PATH = "results/roberta-base-ft"
-# CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
+CLS_MODEL_NAME = "roberta-base"
+CLS_MODEL_PATH = "results/roberta-base-ft"
+CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
 
 SPLITS_PATH = "results/splits.jsonl"
 
