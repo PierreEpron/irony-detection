@@ -57,7 +57,7 @@ def cls_inference(tokenizer, model, data):
 
 def compute_acc_metrics(p):
     metric = evaluate.load("accuracy")
-    preds = torch.nn.functional.softmax(p.predictions, dim=1).argmax(dim=1)
+    preds = torch.nn.functional.softmax(torch.from_numpy(p.predictions), dim=1).argmax(dim=1)
     return metric.compute(predictions=preds, references=p.label_ids)
 
 def cls_train(tokenizer, model, train, val, output_dir):
