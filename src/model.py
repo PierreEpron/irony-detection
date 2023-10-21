@@ -57,7 +57,7 @@ def cls_inference(tokenizer, model, data):
 
 def compute_acc_metrics(p):
     metric = evaluate.load("accuracy")
-    return metric.compute(p.predictions, p.label_ids)
+    return metric.compute(predictions=p.predictions, references=p.label_ids)
 
 def cls_train(tokenizer, model, train, val, output_dir):
     
