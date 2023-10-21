@@ -105,10 +105,10 @@ def clm_inference(tokenizer, model, data, prompt, system_prompt, instruct_prompt
 
     with torch.no_grad():
         for item in tqdm(data, 'CLM inference loop'):
-            tokens = clm_tokenize(tokenizer, prompt, system_prompt, instruct_prompt, item, return_tensors='pt')
+            input_ids = clm_tokenize(tokenizer, prompt, system_prompt, instruct_prompt, item, return_tensors='pt')
             
             outputs = model.generate(
-                input_ids=tokens['input_ids'],
+                input_ids=input_ids,
                 max_new_tokens=16,
                 do_sample=True,
             )
