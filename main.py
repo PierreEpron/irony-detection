@@ -6,7 +6,7 @@ import torch
 import sys
 import os
 
-from src.model import clm_inference, cls_train, load_cls_model, cls_inference
+from src.model import clm_inference, cls_train, load_clm_model, load_cls_model, cls_inference
 from src.preprocessing import make_dataset, iter_splits
 from src.utils import write_jsonl
 
@@ -79,7 +79,7 @@ elif mode == 'cls_train':
 elif mode == 'clm_inf':
 
     tokenizer = AutoTokenizer.from_pretrained(CLM_MODEL_NAME, token=HF_TOKEN)
-    model = load_cls_model(CLM_MODEL_NAME, method="cuda", token=HF_TOKEN)
+    model = load_clm_model(CLM_MODEL_NAME, method="cuda", token=HF_TOKEN)
     
     df = make_dataset(pd.DataFrame(load_dataset(DATASET_NAME)['train']))
     
