@@ -1,6 +1,8 @@
 import torch
-from transformers import AutoModelForSequenceClassification, AutoModelForCausalLM
+from transformers import AutoModelForSequenceClassification, AutoModelForCausalLM, Trainer, TrainingArguments, DataCollatorWithPadding
+from datasets import Dataset
 from tqdm import tqdm
+import evaluate
 
 from src.tokenizer import cls_tokenize
 
@@ -47,7 +49,42 @@ def cls_inference(tokenizer, model, data):
             results.append({
                 'id_original': item['id_original'],
                 'scores': scores[0].tolist(),
+                'gold':item['label'],
                 'pred': int(scores.argmax()),
             })
             
     return results
+
+def compute_acc_metrics(p):
+    metric = evaluate.load("accuracy")
+    return metric.compute(p.predictions, p.label_ids)
+
+def cls_train(tokenizer, model, train, val, output_dir):
+    
+    training_args = TrainingArguments(
+        output_dir=output_dir,
+        do_train =True,
+        do_eval=True,
+        evaluation_strategy='epoch',
+        prediction_loss_only=False,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
+        learning_rate=6e-5,
+        num_train_epochs=10,
+        save_strategy='epoch',
+        optim='adamw_torch',
+    )
+
+    train_set = Dataset.from_list(train).map(lambda x: cls_tokenize(tokenizer, x['parent_text'], x['text']))
+    val_set = Dataset.from_list(val).map(lambda x: cls_tokenize(tokenizer, x['parent_text'], x['text']))
+
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_set if training_args.do_train else None,
+        eval_dataset=val_set if training_args.do_eval else None,
+        compute_metrics=compute_acc_metrics,
+        data_collator=DataCollatorWithPadding(tokenizer)
+    )
+
+    trainer.train()
