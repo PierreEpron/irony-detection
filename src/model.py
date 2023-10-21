@@ -73,7 +73,10 @@ def cls_train(tokenizer, model, train, val, output_dir):
         learning_rate=6e-5,
         num_train_epochs=10,
         save_strategy='epoch',
+        save_total_limit=1,
+        metric_for_best_model="accuracy"
         optim='adamw_torch',
+        load_best_model_at_end=True
     )
 
     train_set = Dataset.from_list(train).map(lambda x: cls_tokenize(tokenizer, x['parent_text'], x['text']))
