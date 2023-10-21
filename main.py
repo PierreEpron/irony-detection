@@ -93,6 +93,8 @@ elif mode == 'clm_inf':
         
         results.append(clm_inference(tokenizer, model, test, PROMPT, SYSTEM_PROMPT, INSTRUCT_PROMPT))
         current_split+=1
+
+        write_jsonl(CLM_RESULT_PATH, results)
     
 
 else:
