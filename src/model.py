@@ -71,7 +71,7 @@ def cls_train(tokenizer, model, train, val, output_dir):
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
         learning_rate=6e-5,
-        num_train_epochs=50,
+        num_train_epochs=10,
         save_strategy='epoch',
         save_total_limit=1,
         metric_for_best_model="accuracy",
@@ -93,5 +93,6 @@ def cls_train(tokenizer, model, train, val, output_dir):
     )
 
     trainer.train()
+    trainer.save_state()
 
     return trainer.model
