@@ -27,9 +27,13 @@ CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
 CLM_MODEL_NAME = 'meta-llama/Llama-2-7b-hf'
 CLM_RESULT_PATH = "results/clm_llama_0.jsonl"
 
-PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nQUESTION:\n{instruct_prompt}\nINPUT:\n - {parent_text} \n - {text} [/INST]\nANSWER: "
-SYSTEM_PROMPT = 'Answer to the following question with only one word'
-INSTRUCT_PROMPT = "Is the following input exchange ironic?"
+# PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nQUESTION:\n{instruct_prompt}\nINPUT:\n - {parent_text} \n - {text} [/INST]\nANSWER: "
+# SYSTEM_PROMPT = 'Answer to the following question with only one word'
+# INSTRUCT_PROMPT = "Is the following input exchange ironic?"
+
+PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nQUESTION:\n{instruct_prompt}\nDIALOG:\n\tB: {parent_text}\n\tA: {text}\nANSWER: [/INST]\n\n"
+SYSTEM_PROMPT = 'Answer only with the word "Yes" or "No"'
+INSTRUCT_PROMPT = "Classify this dialog as ironic or not"
 
 mode = sys.argv[1]
 
