@@ -109,7 +109,7 @@ def clm_inference(tokenizer, model, data, prompt, system_prompt, instruct_prompt
             
             outputs = model.generate(
                 input_ids=input_ids,
-                max_new_tokens=16,
+                max_new_tokens=8,
                 do_sample=True,
             )
 
