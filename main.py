@@ -31,9 +31,13 @@ CLM_RESULT_PATH = "results/clm_llama_0.jsonl"
 # SYSTEM_PROMPT = 'Answer to the following question with only one word'
 # INSTRUCT_PROMPT = "Is the following input exchange ironic?"
 
-PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nQUESTION:\n{instruct_prompt}\nDIALOG:\n\tB: {parent_text}\n\tA: {text} [/INST]\n\n ANSWER:"
-SYSTEM_PROMPT = 'Answer only with the word "Yes" or "No"'
-INSTRUCT_PROMPT = "Classify this dialog as ironic or not"
+# PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nQUESTION:\n{instruct_prompt}\nDIALOG:\n\tB: {parent_text}\n\tA: {text} [/INST]\n\n ANSWER:"
+# SYSTEM_PROMPT = 'Answer only with the word "Yes" or "No"'
+# INSTRUCT_PROMPT = "Classify this dialog as ironic or not"
+
+PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nB: {parent_text}\nA: {text} [/INST]\n\n"
+SYSTEM_PROMPT = 'Classify into 2 labels: "ironic", "not ironic"'
+INSTRUCT_PROMPT = ""
 
 mode = sys.argv[1]
 
