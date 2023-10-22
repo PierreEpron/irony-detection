@@ -1,6 +1,7 @@
 from transformers import AutoTokenizer
 from datasets import load_dataset
 from dotenv import load_dotenv
+from pathlib import Path
 import pandas as pd
 import torch
 import sys
@@ -27,17 +28,9 @@ CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
 CLM_MODEL_NAME = 'meta-llama/Llama-2-7b-hf'
 CLM_RESULT_PATH = "results/clm_llama_0.jsonl"
 
-# PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nQUESTION:\n{instruct_prompt}\nINPUT:\n - {parent_text} \n - {text} [/INST]\nANSWER: "
-# SYSTEM_PROMPT = 'Answer to the following question with only one word'
-# INSTRUCT_PROMPT = "Is the following input exchange ironic?"
-
-# PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nQUESTION:\n{instruct_prompt}\nDIALOG:\n\tB: {parent_text}\n\tA: {text} [/INST]\n\n ANSWER:"
-# SYSTEM_PROMPT = 'Answer only with the word "Yes" or "No"'
-# INSTRUCT_PROMPT = "Classify this dialog as ironic or not"
-
-PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\nB: {parent_text}\nA: {text} [/INST]\n\n"
-SYSTEM_PROMPT = 'Classify into 2 labels: "ironic", "not ironic"'
-INSTRUCT_PROMPT = ""
+PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{instruct_prompt} [/INST]\n\n"
+SYSTEM_PROMPT = 'Classify dialog into 2 labels: "ironic", "not ironic"'
+INSTRUCT_PROMPT = Path('src/prompts/lorem.txt').read_text()
 
 mode = sys.argv[1]
 
