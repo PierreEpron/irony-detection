@@ -28,7 +28,7 @@ CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
 CLM_MODEL_NAME = 'meta-llama/Llama-2-7b-hf'
 CLM_RESULT_PATH = "results/clm_llama_0.jsonl"
 
-PROMPT = "[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{instruct_prompt} [/INST]\n\n"
+PROMPT = "[INST] {instruct_prompt} [/INST]\n\n"
 SYSTEM_PROMPT = 'Classify dialog into 2 labels: "ironic", "not ironic"'
 INSTRUCT_PROMPT = Path('src/prompts/lorem.txt').read_text()
 

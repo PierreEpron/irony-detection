@@ -1,3 +1,5 @@
+Classify the following dialog into 2 labels: "ironic", "not ironic"
+
 DIALOG:
     A: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
     B: Praesent eget dui vel nunc tincidunt sodales vitae id enim.
