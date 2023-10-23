@@ -4,7 +4,7 @@ from datasets import Dataset
 from tqdm import tqdm
 import evaluate
 
-from src.tokenizer import clm_tokenize, cls_tokenize
+from src.tokenizer import clm_template_tokenize, clm_tokenize, cls_tokenize, label_tokenize
 
 def load_cls_model(model_name, method='acc', **kwargs):
     if method == 'acc':
@@ -120,4 +120,25 @@ def clm_inference(tokenizer, model, data, prompt, system_prompt, instruct_prompt
             })
             
     return results
-   
+
+def clm_next_token(tokenizer, model, data, turns, labels):
+    
+    model.eval()
+
+    results = []
+    softmax = torch.nn.Softmax(dim=1)
+    label_ids = label_tokenize(tokenizer, labels, return_tensors='pt').to(model.device)
+
+    with torch.no_grad():
+        for item in tqdm(data, 'CLM next token loop'):
+            input_ids = clm_template_tokenize(tokenizer, turns, item, return_tensors='pt').to(model.device)
+            logits = model(input_ids).logits
+            scores = softmax(logits[..., -1, label_ids]).detach().cpu().numpy()
+            results.append({
+                'id_original': item['id_original'],
+                'scores': scores[0].tolist(),
+                'gold':item['label'],
+                'pred': int(scores.argmax()),
+            })
+
+    return results
