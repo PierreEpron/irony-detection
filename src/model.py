@@ -3,6 +3,7 @@ from transformers import AutoModelForSequenceClassification, AutoModelForCausalL
 from datasets import Dataset
 from tqdm import tqdm
 import evaluate
+import copy
 
 from src.tokenizer import clm_template_tokenize, clm_tokenize, cls_tokenize, label_tokenize
 
@@ -29,7 +30,7 @@ def load_cls_cuda_model(model_name, **kwargs):
     return AutoModelForSequenceClassification.from_pretrained(model_name, **kwargs).to('cuda')
 
 def load_clm_acc_model(model_name, **kwargs):
-    return AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", **kwargs)
+    return AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", max_memory={0:'5GiB', 'cpu':'10GiB'}, **kwargs)
 
 def load_clm_cuda_model(model_name, **kwargs):
     return AutoModelForCausalLM.from_pretrained(model_name, **kwargs).to('cuda')
@@ -131,7 +132,7 @@ def clm_next_token(tokenizer, model, data, turns, labels):
 
     with torch.no_grad():
         for item in tqdm(data, 'CLM next token loop'):
-            input_ids = clm_template_tokenize(tokenizer, turns, item, return_tensors='pt')[..., :-1].to(model.device)
+            input_ids = clm_template_tokenize(tokenizer, copy.deepcopy(turns), item, return_tensors='pt')[..., :-1].to(model.device)
             logits = model(input_ids).logits
             scores = softmax(logits[..., -1, label_ids]).detach().cpu().numpy()
             results.append({
