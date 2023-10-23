@@ -9,3 +9,14 @@ def clm_tokenize(tokenizer, prompt, system_prompt, instruct_prompt, item, **kwar
         instruct_prompt=instruct_prompt, 
     )
     return tokenizer.encode(tokens, **kwargs)
+
+def clm_template_tokenize(tokenizer, turns, item, **kwargs):
+    tokenizer.use_default_system_prompt = False
+
+    for turn in turns:
+        turn['content'] = turn['content'].format(**item)
+
+    return tokenizer.apply_chat_template(turns, **kwargs)
+
+def label_tokenize(tokenizer, labels, **kwargs):
+    return tokenizer.encode(labels, add_special_tokens=False, **kwargs)
