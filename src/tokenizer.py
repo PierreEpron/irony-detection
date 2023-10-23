@@ -16,7 +16,7 @@ def clm_template_tokenize(tokenizer, turns, item, **kwargs):
     for turn in turns:
         turn['content'] = turn['content'].format(**item)
 
-    return tokenizer.apply_chat_template(turns, **kwargs)
+    return tokenizer.apply_chat_template(turns, **kwargs)[:-1]
 
 def label_tokenize(tokenizer, labels, **kwargs):
     return tokenizer.encode(labels, add_special_tokens=False, **kwargs)[0]
