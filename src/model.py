@@ -136,6 +136,7 @@ def clm_next_token(tokenizer, model, data, turns, labels):
             scores = softmax(logits[..., -1, label_ids]).detach().cpu().numpy()
             results.append({
                 'id_original': item['id_original'],
+                'prompt': tokenizer.decode(input_ids),
                 'scores': scores[0].tolist(),
                 'gold':item['label'],
                 'pred': int(scores.argmax()),

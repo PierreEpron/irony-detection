@@ -107,7 +107,7 @@ elif mode == 'clm_inf':
 elif mode == 'clm_nt':
 
     tokenizer = AutoTokenizer.from_pretrained(CLM_MODEL_NAME, token=HF_TOKEN)
-    model = load_clm_model(CLM_MODEL_NAME, token=HF_TOKEN)
+    model = load_clm_model(CLM_MODEL_NAME, method='cuda', token=HF_TOKEN)
     
     # Silence tokenization prints
     tokenizer.add_special_tokens({'sep_token':'<SEP>', 'pad_token':'<PAD>', 'cls_token':'<CLS>', 'mask_token':'<MASK>'})
