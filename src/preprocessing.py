@@ -1,5 +1,6 @@
 import pandas as pd
 import random
+import re
 
 from src.tokenizer import cls_tokenize
 
@@ -7,7 +8,9 @@ from sklearn.model_selection import StratifiedShuffleSplit
 
 from src.utils import read_jsonl
 
-def make_line(values:pd.DataFrame, equality):
+REG_EXPRS = {'w':('(https?:\/\/)?([\w\d\-_]+)\.([\w\d\-_]+)\/?\??([^ \.#\n\r]*)?#?([^ \n\r]*)', ''), 'u':('@[\w]+', ''), 'n':('\n', ' ')}
+
+def make_line(values:pd.DataFrame, equality, cleaning):
     """
         Returns a list of values based on a dataframe containing annotation for one Post/Reply pair.
 
@@ -31,17 +34,20 @@ def make_line(values:pd.DataFrame, equality):
             label = 1
         elif equality=='not': #if equalities default to not irony
             label = 0
-        elif equality: #if equalities are kept
+        else: #if equalities are kept
             label = random.randint(0, 1)
     else: #if this is not an equality
         label = 1 if labels.idxmax()=='iro' else 0 #set the label to 1 if text is irony and 0 otherwise
-    
-    
+
+    for pattern in cleaning:
+        line[3] = re.sub(REG_EXPRS[pattern][0], REG_EXPRS[pattern][1], line[3])
+        line[5] = re.sub(REG_EXPRS[pattern][0], REG_EXPRS[pattern][1], line[5])
+
     line.append(label)
     
     return line
 
-def make_dataset(dataset, n_annotators=None, equality=False) -> pd.DataFrame:
+def make_dataset(dataset, n_annotators=None, equality=False, cleaning=['n']) -> pd.DataFrame:
     """
         Returns a dataset of Post/Reply pairs with a 1 (irony) or 0 (not irony) label.
 
@@ -63,7 +69,7 @@ def make_dataset(dataset, n_annotators=None, equality=False) -> pd.DataFrame:
         line = None #reset line
 
         if not n_annotators or (n_annotators and len(values.label)>=n_annotators): #if no amount of min annotators is provided OR an amount of min annotators is provided and respected
-            line = make_line(values, equality) #attempts to create a line
+            line = make_line(values, equality, cleaning) #attempts to create a line
 
         if line: #if a line was created
             tab_majority_decision.append(line)
