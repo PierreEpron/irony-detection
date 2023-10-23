@@ -131,7 +131,7 @@ def clm_next_token(tokenizer, model, data, turns, labels):
 
     with torch.no_grad():
         for item in tqdm(data, 'CLM next token loop'):
-            input_ids = clm_template_tokenize(tokenizer, turns, item, return_tensors='pt').to(model.device)
+            input_ids = clm_template_tokenize(tokenizer, turns, item, return_tensors='pt')[..., :-1].to(model.device)
             logits = model(input_ids).logits
             scores = softmax(logits[..., -1, label_ids]).detach().cpu().numpy()
             results.append({
