@@ -17,13 +17,13 @@ HF_TOKEN = os.getenv('HF_TOKEN')
 DATASET_NAME = "CreativeLang/EPIC_Irony"
 SPLITS_PATH = "results/splits.jsonl"
 
-# CLS_MODEL_NAME = "cardiffnlp/twitter-roberta-base-irony"
-# CLS_MODEL_PATH = "results/roberta-irony-ft"
-# CLS_RESULT_PATH = "results/cls_roberta-irony_ft.jsonl"
+CLS_MODEL_NAME = "cardiffnlp/twitter-roberta-base-irony"
+CLS_MODEL_PATH = "results/roberta-irony-ft"
+CLS_RESULT_PATH = "results/cls_roberta-irony_zs.jsonl"
 
-CLS_MODEL_NAME = "roberta-base"
-CLS_MODEL_PATH = "results/roberta-base-ft"
-CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
+# CLS_MODEL_NAME = "roberta-base"
+# CLS_MODEL_PATH = "results/roberta-base-ft"
+# CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
 
 CLM_MODEL_NAME = 'meta-llama/Llama-2-7b-hf'
 CLM_RESULT_PATH = "results/clm_llama_nt.jsonl"
@@ -34,7 +34,7 @@ INSTRUCT_PROMPT = Path('src/prompts/lorem.txt').read_text()
 
 CLM_TURNS = [
     {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": 'Below is a dialogue between person B and person.\n\nA: {parent_text}\nB: {text}\n\nIs B response ironic to A? Answer by yes or no.'},
+    {"role": "user", "content": 'Below is a dialogue between person A and person B.\n\nA: {parent_text}\nB: {text}\n\nIs B response ironic to A? Answer by yes or no.'},
     {"role": "assistant", "content": 'The answer to your question is '},
 ]
 CLM_LABELS = ['no', 'yes']
