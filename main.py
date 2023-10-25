@@ -25,7 +25,7 @@ CLS_RESULT_PATH = "results/cls_roberta-irony_zs.jsonl"
 # CLS_MODEL_PATH = "results/roberta-base-ft"
 # CLS_RESULT_PATH = "results/cls_roberta-base_ft.jsonl"
 
-CLM_MODEL_NAME = 'meta-llama/Llama-2-7b-hf'
+CLM_MODEL_NAME = 'meta-llama/Llama-2-7b-chat-hf'
 CLM_RESULT_PATH = "results/clm_llama_nt.jsonl"
 
 PROMPT = "[INST] {instruct_prompt} [/INST]\n\n"
