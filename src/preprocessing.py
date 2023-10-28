@@ -1,6 +1,7 @@
 import pandas as pd
 import random
 import re
+import demoji
 
 from src.tokenizer import cls_tokenize
 
@@ -10,7 +11,7 @@ from src.utils import read_jsonl
 
 REG_EXPRS = {'w':('(https?:\/\/)?([\w\d\-_]+)\.([\w\d\-_]+)\/?\??([^ \.#\n\r]*)?#?([^ \n\r]*)', ''), 'u':('@[\w]+', ''), 'n':('\n', ' ')}
 
-def make_line(values:pd.DataFrame, equality, cleaning):
+def make_line(values:pd.DataFrame, equality, cleaning, emojis):
     """
         Returns a list of values based on a dataframe containing annotation for one Post/Reply pair.
 
@@ -18,6 +19,8 @@ def make_line(values:pd.DataFrame, equality, cleaning):
         ----------
         values : pandas dataframe.
         equality : whether pairs where there is no majority decision for the label should be kept.
+        cleaning : list of things that should be removed from the texts. Values must be n (newlines), w (weblinks) or u (user mentions).
+        emojis : to handle emojis. Values must be either 'rem' (remove), 'keep' or a str to be used as separator between their description. 
 
         Returns
         ---------
@@ -39,6 +42,13 @@ def make_line(values:pd.DataFrame, equality, cleaning):
     else: #if this is not an equality
         label = 1 if labels.idxmax()=='iro' else 0 #set the label to 1 if text is irony and 0 otherwise
 
+    if emojis=='rem':
+        line[3] = demoji.replace(line[3], '')
+        line[5] = demoji.replace(line[5], '')
+    elif emojis!='keep':
+        line[3] = demoji.replace_with_desc(line[3], emojis)
+        line[5] = demoji.replace_with_desc(line[5], emojis)
+
     for pattern in cleaning:
         line[3] = re.sub(REG_EXPRS[pattern][0], REG_EXPRS[pattern][1], line[3])
         line[5] = re.sub(REG_EXPRS[pattern][0], REG_EXPRS[pattern][1], line[5])
@@ -47,7 +57,7 @@ def make_line(values:pd.DataFrame, equality, cleaning):
     
     return line
 
-def make_dataset(dataset, n_annotators=None, equality=False, cleaning=['n']) -> pd.DataFrame:
+def make_dataset(dataset, n_annotators=None, equality=False, cleaning=['n'], emojis=' ') -> pd.DataFrame:
     """
         Returns a dataset of Post/Reply pairs with a 1 (irony) or 0 (not irony) label.
 
@@ -56,6 +66,8 @@ def make_dataset(dataset, n_annotators=None, equality=False, cleaning=['n']) -> 
         dataset : pandas dataframe.
         n_annotators : minimum number of annotators for each pair.
         equality : whether pairs where there is no majority decision for the label should be kept.
+        cleaning : list of things that should be removed from the texts. Values must be n (newlines), w (weblinks) or u (user mentions).
+        emojis : to handle emojis. Values must be either 'rem' (remove), 'keep' or a str to be used as separator between their description. 
 
         Returns
         ---------
@@ -69,7 +81,7 @@ def make_dataset(dataset, n_annotators=None, equality=False, cleaning=['n']) -> 
         line = None #reset line
 
         if not n_annotators or (n_annotators and len(values.label)>=n_annotators): #if no amount of min annotators is provided OR an amount of min annotators is provided and respected
-            line = make_line(values, equality, cleaning) #attempts to create a line
+            line = make_line(values, equality, cleaning, emojis) #attempts to create a line
 
         if line: #if a line was created
             tab_majority_decision.append(line)
