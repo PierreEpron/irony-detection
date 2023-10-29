@@ -7,11 +7,11 @@ from src.tokenizer import cls_tokenize
 
 from sklearn.model_selection import StratifiedShuffleSplit
 
-from src.utils import read_jsonl
+from src.utils import read_jsonl, find_closest
 
 REG_EXPRS = {'w':('(https?:\/\/)?([\w\d\-_]+)\.([\w\d\-_]+)\/?\??([^ \.#\n\r]*)?#?([^ \n\r]*)', ''), 'u':('@[\w]+', ''), 'n':('\n', ' ')}
 
-def make_line(values:pd.DataFrame, equality, cleaning, emojis):
+def make_line(values:pd.DataFrame, equality, cleaning, emojis, new_labels):
     """
         Returns a list of values based on a dataframe containing annotation for one Post/Reply pair.
 
@@ -20,7 +20,8 @@ def make_line(values:pd.DataFrame, equality, cleaning, emojis):
         values : pandas dataframe.
         equality : whether pairs where there is no majority decision for the label should be kept.
         cleaning : list of things that should be removed from the texts. Values must be n (newlines), w (weblinks) or u (user mentions).
-        emojis : to handle emojis. Values must be either 'rem' (remove), 'keep' or a str to be used as separator between their description. 
+        emojis : to handle emojis. Values must be either 'rem' (remove), 'keep' or a str to be used as separator between their description.
+        new_labels : list of new labels to use. Must be listed from not ironic to ironic.
 
         Returns
         ---------
@@ -28,19 +29,16 @@ def make_line(values:pd.DataFrame, equality, cleaning, emojis):
     """
     
     line = values.iloc[0,3:10].values.tolist() #keep the values that are shared
-    labels = values.label.value_counts()
+    labels = values.label.value_counts().to_dict()
 
-    if len(labels)>1 and labels.iloc[0] == labels.iloc[1]: #if this is an equality 
+    if len(labels)>1 and labels['iro'] == labels['not']: #if this is an equality 
         if not equality: #if equalities are not kept
             return None
-        elif equality=='iro': #if equalities default to irony
-            label = 1
-        elif equality=='not': #if equalities default to not irony
-            label = 0
         else: #if equalities are kept
             label = random.randint(0, 1)
     else: #if this is not an equality
-        label = 1 if labels.idxmax()=='iro' else 0 #set the label to 1 if text is irony and 0 otherwise
+        # label = 1 if pd.Series(labels).idxmax()=='iro' else 0 #set the label to 1 if text is irony and 0 otherwise
+        label = new_labels[find_closest(labels.get('iro', 0)/(labels.get('iro', 0)+labels.get('not', 0)), list(new_labels.keys()))]
 
     if emojis=='rem':
         line[3] = demoji.replace(line[3], '')
@@ -57,7 +55,7 @@ def make_line(values:pd.DataFrame, equality, cleaning, emojis):
     
     return line
 
-def make_dataset(dataset, n_annotators=None, equality=False, cleaning=['n'], emojis=' ') -> pd.DataFrame:
+def make_dataset(dataset, n_annotators:int = None, equality = False, cleaning:list = ['n'], emojis:str = ' ', new_labels:list = [0,1]) -> pd.DataFrame:
     """
         Returns a dataset of Post/Reply pairs with a 1 (irony) or 0 (not irony) label.
 
@@ -67,26 +65,28 @@ def make_dataset(dataset, n_annotators=None, equality=False, cleaning=['n'], emo
         n_annotators : minimum number of annotators for each pair.
         equality : whether pairs where there is no majority decision for the label should be kept.
         cleaning : list of things that should be removed from the texts. Values must be n (newlines), w (weblinks) or u (user mentions).
-        emojis : to handle emojis. Values must be either 'rem' (remove), 'keep' or a str to be used as separator between their description. 
+        emojis : to handle emojis. Values must be either 'rem' (remove), 'keep' or a str to be used as separator between their description.
+        new_labels : list of new labels to use. Must be listed from not ironic to ironic.
 
         Returns
         ---------
         prepared_dataset : a dataset with 0/1 labels for each Post/Reply pair. 
     """
 
-    tab_majority_decision = []
+    tab = []
+    new_labels = {x/(len(new_labels)-1):y for x,y in enumerate(new_labels, start=0)}
     
     for id, values in dataset.groupby('id_original'):
 
         line = None #reset line
 
         if not n_annotators or (n_annotators and len(values.label)>=n_annotators): #if no amount of min annotators is provided OR an amount of min annotators is provided and respected
-            line = make_line(values, equality, cleaning, emojis) #attempts to create a line
+            line = make_line(values, equality, cleaning, emojis, new_labels) #attempts to create a line
 
         if line: #if a line was created
-            tab_majority_decision.append(line)
+            tab.append(line)
             
-    return pd.DataFrame(tab_majority_decision, columns=dataset.columns[3:10].tolist()+['label'])
+    return pd.DataFrame(tab, columns=dataset.columns[3:10].tolist()+['label'])
 
 def filter_dataset(df, tokenizer, max_token=514):
 

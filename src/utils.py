@@ -25,3 +25,6 @@ def write_jsonl(path, data, encoding='utf-8'):
     """
     path = Path(path) if isinstance(path, str) else path
     path.write_text('\n'.join([json.dumps(item) for item in data]), encoding=encoding)
+
+def find_closest(num, collection): # from https://stackoverflow.com/a/12141215
+   return min(collection, key=lambda x:abs(x-num))
