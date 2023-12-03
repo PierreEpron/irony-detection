@@ -16,7 +16,7 @@ def epoch(tokenizer, model, data, phrases, output_func, label_ids):
     results = []
 
     for item in tqdm(data, 'CLM next token loop'):
-        turns, seed_phs  = generate_turns(item, phrases)
+        turns, seed_phs, subs  = generate_turns(item, phrases)
         input_ids = tokenizer.apply_chat_template(turns, return_tensors='pt')[..., :-1].to(model.device)
 
         logits = model(input_ids).logits
@@ -29,6 +29,7 @@ def epoch(tokenizer, model, data, phrases, output_func, label_ids):
             'pred': int(scores.argmax()),
             'turns':turns, 
             'seed_phs':seed_phs,
+            'subs': subs
         })
 
     return results

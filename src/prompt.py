@@ -2,6 +2,7 @@ from copy import deepcopy
 import json
 from pathlib import Path
 import random
+import re
 
 TURNS_TEMPLATE = [
     {"role": "system", "content": "{system}"},
@@ -45,13 +46,15 @@ def format_closure(text, item):
         Examples
         ========
         >>> format_closure('0{A}1', {'A':'0{AA}1', 'AA':'2'})
-        '00211'
+        ('00211', ['A', 'AA'])
     """
     _text = None
+    subs = []
     while _text != text:
         _text = text
+        subs += [m for m in re.findall(r'\{([^\}]+)\}', text) if m in item]
         text = text.format(**item)
-    return text
+    return text, subs
 
 def generate_turns(item, phrases, tempate=TURNS_TEMPLATE):
     """
@@ -64,17 +67,19 @@ def generate_turns(item, phrases, tempate=TURNS_TEMPLATE):
         
         Examples
         ========
-        >>> random.seed(42)
-        >>> phrases = {'system':[{'text': 'Some names:'}, {'text':'Names:'}], 'user':[{'text':'{firstname} {name}'}, {'text':'Anonyme'}],'firstname':[{'text':'Noam'}, {'text':'Richard'}, {'text':'Alan'}],'name':[{'text':'Chomsy'}, {'text':'Montague'}, {'text':'Turing'}],"assistant":[{'text': 'End'}],}
-        >>> generate_turns({}, phrases=phrases)
+        random.seed(42)
+        phrases = {'system':[{'text': 'Some names:'}, {'text':'Names:'}], 'user':[{'text':'{firstname} {name}'}, {'text':'Anonyme'}],'firstname':[{'text':'Noam'}, {'text':'Richard'}, {'text':'Alan'}],'name':[{'text':'Chomsy'}, {'text':'Montague'}, {'text':'Turing'}],"assistant":[{'text': 'End'}],}
+        generate_turns({}, phrases=phrases)
         ([{'role': 'system', 'content': 'Some names:'}, {'role': 'user', 'content': 'Alan Montague'}, {'role': 'assistant', 'content': 'End'}], {'system': 0, 'user': 0, 'firstname': 2, 'name': 1, 'assistant': 0})
     """
     turns = deepcopy(tempate)
     random_phs, seed_phs = randomize_phrases(phrases)
     new_item = item | random_phs
+    subs = []
     for turn in turns:
-        turn['content'] = format_closure(turn['content'], new_item)
-    return turns, seed_phs 
+        turn['content'], _subs = format_closure(turn['content'], new_item)
+        subs += _subs
+    return turns, seed_phs, subs
 
 
 def load_phrases(path):
@@ -83,6 +88,6 @@ def load_phrases(path):
     return phrases, phrases['labels'][0]['values']
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     import doctest
     doctest.testmod()
