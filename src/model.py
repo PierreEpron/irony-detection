@@ -108,7 +108,7 @@ def run(
     results = []
     current_split = 1
 
-    for train, val, test in load_data_func():
+    for train, val, test in load_data_func(config):
 
         torch.cuda.empty_cache()
 
