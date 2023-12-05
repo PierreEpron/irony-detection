@@ -1,5 +1,5 @@
 from src.utils import load_config
-from src.model import run
+from src.model import cls_run
 
 import torch 
 
@@ -19,6 +19,6 @@ if __name__ == "__main__":
         ],
     }
     
-    run(config)
+    cls_run(config)
 
    

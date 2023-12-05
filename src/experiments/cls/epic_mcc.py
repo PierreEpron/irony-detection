@@ -1,5 +1,5 @@
 from src.utils import load_config
-from src.model import run
+from src.model import cls_run
 from src.training import MCC_Loss
 
 if __name__ == "__main__":
@@ -11,4 +11,4 @@ if __name__ == "__main__":
             (MCC_Loss(), 1), 
         ],
     }
-    run(config)
+    cls_run(config)

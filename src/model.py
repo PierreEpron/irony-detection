@@ -5,7 +5,8 @@ import pandas as pd
 import torch
 
 from src.preprocessing import iter_splits, make_dataset, load_tweeteval
-from src.tokenizer import cls_double_tokenize
+from src.tokenizer import cls_double_tokenize, label_tokenize
+from src.prompt import generate_turns, load_phrases
 from src.utils import write_jsonl
 from src.training import IronyTrainer
 
@@ -43,6 +44,13 @@ def cls_load_epic(config):
 
 def cls_load_tweeteval(config):
     return [load_tweeteval()]
+
+def clm_load_epic(config):
+    return make_dataset(pd.DataFrame(load_dataset(config['DATASET_NAME'])['train'])).to_dict(orient='records')
+
+def clm_load_tweeteval(config):
+    train, val, test = load_tweeteval()
+    return train + val + test
 
 def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
     
@@ -97,7 +105,29 @@ def cls_inference(tokenizer, model, data):
             
     return results
 
-def run(
+def clm_random_inference(tokenizer, model, data, phrases, output_func, label_ids):
+    results = []
+
+    for item in tqdm(data, 'CLM next token loop'):
+        turns, seed_phs, subs  = generate_turns(item, phrases)
+        input_ids = tokenizer.apply_chat_template(turns, return_tensors='pt')[..., :-1].to(model.device)
+
+        logits = model(input_ids).logits
+        scores = output_func(logits[..., -1, label_ids]).detach().cpu().numpy()
+
+        results.append({
+            'id_original': item['id_original'],
+            'scores': scores[0].tolist(),
+            'gold':item['label'],
+            'pred': int(scores.argmax()),
+            'turns':turns, 
+            'seed_phs':seed_phs,
+            'subs': subs
+        })
+
+    return results
+
+def cls_run(
         config,
         load_data_func=cls_load_epic, 
         tokenize_func=cls_double_tokenize, 
@@ -115,10 +145,12 @@ def run(
         tokenizer = AutoTokenizer.from_pretrained(config['CLS_MODEL_NAME'], token=config['HF_TOKEN'])
         model = load_cls_model(config['CLS_MODEL_NAME'], method=config['LOAD_MODEL_METHOD'], token=config['HF_TOKEN'])
 
-        # train, val, test = train[:2], val[:2], test[:2]
-        train_set = Dataset.from_list(train).map(lambda x: tokenize_func(tokenizer, **x))
-        val_set = Dataset.from_list(val).map(lambda x: tokenize_func(tokenizer, **x))
-        test_set = Dataset.from_list(test).map(lambda x: tokenize_func(tokenizer, **x))
+        train, val, test = train[:2], val[:2], test[:2]
+        train_set = Dataset.from_list(train).map(lambda x: tokenize_func(tokenizer, x))
+        val_set = Dataset.from_list(val).map(lambda x: tokenize_func(tokenizer, x))
+        test_set = Dataset.from_list(test).map(lambda x: tokenize_func(tokenizer, x))
+
+        print(train_set[0])
 
         current_path = f"{config['OUTPUT_DIR']}_{current_split}"
         
@@ -129,3 +161,33 @@ def run(
         write_jsonl(config['RESULT_PATH'], results)
         
         current_split+=1
+
+def clm_run(
+        config,
+        load_data_func=cls_load_epic, 
+        inference_func=cls_inference):
+
+    phrases, labels = load_phrases(config['CLM_PHRASES_PATH'])
+
+    tokenizer = AutoTokenizer.from_pretrained(config['CLM_MODEL_NAME'], token=config['HF_TOKEN'])
+    tokenizer.add_special_tokens({'sep_token':'<SEP>', 'pad_token':'<PAD>', 'cls_token':'<CLS>', 'mask_token':'<MASK>'})
+    tokenizer.use_default_system_prompt = False
+
+    model = load_clm_model(config['CLM_MODEL_NAME'], method=config['LOAD_MODEL_METHOD'], token=config['HF_TOKEN'])
+    model.eval()
+
+    data = load_data_func(config)
+    # data = data[:2]
+    
+    results = []
+
+    with torch.no_grad():
+        for i in range(int(config['CLM_N_STEPS'])):
+            print(f'##### Starting epoch: {i+1} #####')
+            torch.cuda.empty_cache()
+            
+            softmax = torch.nn.Softmax(dim=1)
+            label_ids = label_tokenize(tokenizer, labels, return_tensors='pt').to(model.device)
+
+            results.append(inference_func(tokenizer, model, data, phrases, softmax, label_ids))
+            write_jsonl(config['RESULT_PATH'], results)
