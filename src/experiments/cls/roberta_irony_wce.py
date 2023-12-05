@@ -38,9 +38,11 @@ def train_loop(tokenizer, model, train, val, current_path):
     train_set = Dataset.from_list(train).map(lambda x: cls_tokenize(tokenizer, x['parent_text'], x['text']))
     val_set = Dataset.from_list(val).map(lambda x: cls_tokenize(tokenizer, x['parent_text'], x['text']))
 
+    label_weights = torch.Tensor([.314, .686]).to(model.device)
+
     trainer = IronyTrainer(
         loss_funcs = [
-            (torch.nn.CrossEntropyLoss(torch.Tensor([.314, .686])), 1),
+            (torch.nn.CrossEntropyLoss(label_weights), 1),
             # (MCC_Loss(), 1), 
         ],
         model=model,
