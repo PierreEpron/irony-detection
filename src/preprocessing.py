@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 import random
 import re
@@ -122,3 +123,16 @@ def iter_splits(splits_path, df):
     splits = read_jsonl(splits_path)
     for split in splits:
         yield recover_split(split['train'], df), recover_split(split['val'], df), recover_split(split['test'], df)
+
+def load_tweeteval_set(name, path):
+    X = (path / f'{name}_text.txt').read_text().split('\n')
+    Y = (path / f'{name}_labels.txt').read_text().split('\n')
+    return [{'text':x, 'label':y} for x, y in zip(X,Y)]
+
+def load_tweeteval(path='data/tweet-eval/'):
+    path = Path(str(path)) 
+    return (
+        load_tweeteval_set('train', path),
+        load_tweeteval_set('val', path),
+        load_tweeteval_set('test', path)
+    )

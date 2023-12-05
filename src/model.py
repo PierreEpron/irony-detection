@@ -1,11 +1,15 @@
-import torch
-from transformers import AutoModelForSequenceClassification, AutoModelForCausalLM, Trainer, TrainingArguments, DataCollatorWithPadding
-from datasets import Dataset
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModelForCausalLM, TrainingArguments, DataCollatorWithPadding
+from datasets import Dataset, load_dataset
 from tqdm import tqdm
+import pandas as pd
+import torch
 import evaluate
 import copy
 
-from src.tokenizer import clm_template_tokenize, clm_tokenize, cls_tokenize, label_tokenize
+from src.preprocessing import iter_splits, make_dataset, load_tweeteval
+from src.tokenizer import cls_double_tokenize
+from src.utils import write_jsonl
+from training import IronyTrainer
 
 def load_cls_model(model_name, method='acc', **kwargs):
     if method == 'acc':
@@ -35,17 +39,56 @@ def load_clm_acc_model(model_name, **kwargs):
 def load_clm_cuda_model(model_name, **kwargs):
     return AutoModelForCausalLM.from_pretrained(model_name, **kwargs).to('cuda')
 
-def cls_inference(tokenizer, model, data):
+def cls_load_epic(config):
+    df = make_dataset(pd.DataFrame(load_dataset(config['DATASET_NAME'])['train']))
+    return iter_splits(config['SPLITS_PATH'], df)
 
+def cls_load_tweeteval(config):
+    return [load_tweeteval()]
+
+def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
+    
+    training_args = TrainingArguments(
+        output_dir=current_path,
+        do_train =True,
+        do_eval=True,
+        evaluation_strategy='epoch',
+        prediction_loss_only=False,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
+        learning_rate=6e-5,
+        num_train_epochs=10,
+        save_strategy='epoch',
+        save_total_limit=5,
+        optim='adamw_torch',
+        load_best_model_at_end=True,
+        logging_strategy="epoch",
+        fp16=True 
+    )
+
+    trainer = IronyTrainer(
+        loss_funcs = loss_funcs,
+        model=model,
+        args=training_args,
+        train_dataset=train if training_args.do_train else None,
+        eval_dataset=val if training_args.do_eval else None,
+        data_collator=DataCollatorWithPadding(tokenizer)
+    )
+
+    trainer.train()
+    trainer.save_state()
+
+    return trainer.model
+
+def cls_inference(tokenizer, model, data):
     results = []
 
-    softmax = torch.nn.Softmax(dim=1)
+    softmax = torch.nn.Softmax(dim=-1)
     model.eval() 
 
     with torch.no_grad():
         for item in tqdm(data, 'CLS inference loop'):
-            tokens = cls_tokenize(tokenizer, item['parent_text'], item['text'], return_tensors='pt').to(model.device)
-            outputs = model(**tokens)
+            outputs = model(**item)
             scores = softmax(outputs.logits).detach().cpu().numpy()
             results.append({
                 'id_original': item['id_original'],
@@ -56,90 +99,35 @@ def cls_inference(tokenizer, model, data):
             
     return results
 
-def compute_acc_metrics(p):
-    metric = evaluate.load("accuracy")
-    preds = torch.nn.functional.softmax(torch.from_numpy(p.predictions), dim=1).argmax(dim=1)
-    return metric.compute(predictions=preds, references=p.label_ids)
+def run(
+        config,
+        load_data_func=cls_load_epic, 
+        tokenize_func=cls_double_tokenize, 
+        train_func=cls_train, 
+        inference_func=cls_inference):
 
-def cls_train(tokenizer, model, train, val, output_dir):
-    
-    training_args = TrainingArguments(
-        output_dir=output_dir,
-        do_train =True,
-        do_eval=True,
-        evaluation_strategy='epoch',
-        prediction_loss_only=False,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=16,
-        learning_rate=6e-5,
-        num_train_epochs=10,
-        save_strategy='epoch',
-        save_total_limit=1,
-        metric_for_best_model="accuracy",
-        optim='adamw_torch',
-        load_best_model_at_end=True,
-        logging_strategy="epoch"
-    )
-
-    train_set = Dataset.from_list(train).map(lambda x: cls_tokenize(tokenizer, x['parent_text'], x['text']))
-    val_set = Dataset.from_list(val).map(lambda x: cls_tokenize(tokenizer, x['parent_text'], x['text']))
-
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_set if training_args.do_train else None,
-        eval_dataset=val_set if training_args.do_eval else None,
-        compute_metrics=compute_acc_metrics,
-        data_collator=DataCollatorWithPadding(tokenizer)
-    )
-
-    trainer.train()
-    trainer.save_state()
-
-    return trainer.model
-
-def clm_inference(tokenizer, model, data, prompt, system_prompt, instruct_prompt):
-    
-    results = []
-
-    model.eval()
-
-    with torch.no_grad():
-        for item in tqdm(data, 'CLM inference loop'):
-            input_ids = clm_tokenize(tokenizer, prompt, system_prompt, instruct_prompt, item, return_tensors='pt').to(model.device)
-            
-            outputs = model.generate(
-                input_ids=input_ids,
-                max_new_tokens=8,
-                do_sample=True,
-            )
-
-            results.append({
-                'id_original': item['id_original'],
-                'gold':item['label'],
-                'output': tokenizer.decode(outputs[0], skip_special_tokens=True)
-            })
-            
-    return results
-
-def clm_next_token(tokenizer, model, data, turns, labels):
-    
-    model.eval()
 
     results = []
-    softmax = torch.nn.Softmax(dim=1)
-    label_ids = label_tokenize(tokenizer, labels, return_tensors='pt').to(model.device)
+    current_split = 1
 
-    with torch.no_grad():
-        for item in tqdm(data, 'CLM next token loop'):
-            input_ids = clm_template_tokenize(tokenizer, copy.deepcopy(turns), item, return_tensors='pt')[..., :-1].to(model.device)
-            logits = model(input_ids).logits
-            scores = softmax(logits[..., -1, label_ids]).detach().cpu().numpy()
-            results.append({
-                'id_original': item['id_original'],
-                'scores': scores[0].tolist(),
-                'gold':item['label'],
-                'pred': int(scores.argmax()),
-            })
+    for train, val, test in load_data_func():
 
-    return results
+        torch.cuda.empty_cache()
+
+        tokenizer = AutoTokenizer.from_pretrained(config['CLS_MODEL_NAME'], token=config['HF_TOKEN'])
+        model = load_cls_model(config['CLS_MODEL_NAME'], method=config['LOAD_MODEL_METHOD'], token=config['HF_TOKEN'])
+
+        # train, val, test = train[:2], val[:2], test[:2]
+        train_set = Dataset.from_list(train).map(lambda x: tokenize_func(tokenizer, x['parent_text'], x['text']))
+        val_set = Dataset.from_list(val).map(lambda x: tokenize_func(tokenizer, x['parent_text'], x['text']))
+        test_set = Dataset.from_list(test).map(lambda x: tokenize_func(tokenizer, x['parent_text'], x['text']))
+
+        current_path = f"{config['OUTPUT_DIR']}_{current_split}"
+        
+        model = train_func(tokenizer, model, train_set, val_set, current_path, config['LOSS_FUNCS'])
+        
+        results.append(inference_func(tokenizer, model, test_set))
+        
+        write_jsonl(config['RESULT_PATH'], results)
+        
+        current_split+=1
