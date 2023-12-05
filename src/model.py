@@ -116,9 +116,9 @@ def run(
         model = load_cls_model(config['CLS_MODEL_NAME'], method=config['LOAD_MODEL_METHOD'], token=config['HF_TOKEN'])
 
         # train, val, test = train[:2], val[:2], test[:2]
-        train_set = Dataset.from_list(train).map(lambda x: tokenize_func(tokenizer, x['parent_text'], x['text']))
-        val_set = Dataset.from_list(val).map(lambda x: tokenize_func(tokenizer, x['parent_text'], x['text']))
-        test_set = Dataset.from_list(test).map(lambda x: tokenize_func(tokenizer, x['parent_text'], x['text']))
+        train_set = Dataset.from_list(train).map(lambda x: tokenize_func(tokenizer, **x))
+        val_set = Dataset.from_list(val).map(lambda x: tokenize_func(tokenizer, **x))
+        test_set = Dataset.from_list(test).map(lambda x: tokenize_func(tokenizer, **x))
 
         current_path = f"{config['OUTPUT_DIR']}_{current_split}"
         

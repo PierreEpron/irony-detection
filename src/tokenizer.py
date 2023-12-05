@@ -1,10 +1,10 @@
-def cls_double_tokenize(tokenizer, parent_text, text, **kwargs):
+def cls_double_tokenize(tokenizer, **kwargs):
     ''' Tokenize given parent_text and text for classification task '''
-    return tokenizer(f"{parent_text}{tokenizer.eos_token}{tokenizer.bos_token}{text}", **kwargs)
+    return tokenizer(f"{kwargs['parent_text']}{tokenizer.eos_token}{tokenizer.bos_token}{kwargs['text']}", **kwargs)
 
-def cls_single_tokenize(tokenizer, text, **kwargs):
+def cls_single_tokenize(tokenizer, **kwargs):
     ''' Tokenize given  text for classification task '''
-    return tokenizer(f"{text}", **kwargs)
+    return tokenizer(f"{kwargs['text']}", **kwargs)
 
 def clm_tokenize(tokenizer, prompt, system_prompt, instruct_prompt, item, **kwargs):
     instruct_prompt = instruct_prompt.format(parent_text=item['parent_text'], text=item['text'])
