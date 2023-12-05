@@ -17,19 +17,22 @@
         {"text": "The answer is"}
     ],
     "intro": [
-        {"text": "Below is a sentence{input}"},
-        {"text": "Below is an input{input}"},
-        {"text": "Below is an utterance of a discussion{input}"},
+        {"text": "Below is a dialogue between person A and person B.\n\n{input}"},
+        {"text": "Below is an exchange between person A and person B.\n\n{input}"},
+        {"text": "Below is a dialogue between user A and user B.\n\n{input}"},
+        {"text": "Below is an exchange between user A and user B.\n\n{input}"},
         {"text": "{input}"}
     ],
     "input": [
-        {"text": ".\n\nSentence: {text}\n\n"},
-        {"text":": {text}\n\n"}
+        {"text": "User A:{parent_text}\nUser B:{text}\n\n"},
+        {"text":"B:{parent_text}\nA:{text}\n\n"}
     ],
     "question": [
-        {"text": "Is this sentence ironic?"},
-        {"text": "Is this input ironic?"},
-        {"text": "Is this utterance ironic?"}
+        {"text": "Is A's response to B ironic?"},
+        {"text": "Is A's answer to B ironic?"},
+        {"text": "Is this dialog ironic?"},
+        {"text": "Is this exchange ironic?"},
+        {"text": "Using the previous exchange, predict whether there is irony present in user A's response."}
     ],
     "format": [
         {"text": "Answer by {labels}."},
