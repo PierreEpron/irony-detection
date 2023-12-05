@@ -3,9 +3,6 @@ from src.model import run
 
 import torch 
 
-OUTPUT_DIR = "results/roberta_irony_mcc"
-RESULT_PATH = "results/roberta_irony_mcc.jsonl"
-
 if __name__ == "__main__":
 
     config = load_config()
@@ -15,8 +12,8 @@ if __name__ == "__main__":
     label_weights = torch.Tensor([.314, .686]).to(device)
 
     config = config | {
-        'OUTPUT_DIR':"results/roberta_irony_mcc", 
-        'RESULT_PATH':"results/roberta_irony_mcc.jsonl",
+        'OUTPUT_DIR':"results/epic_wce", 
+        'RESULT_PATH':"results/epic_wce.jsonl",
         'LOSS_FUNCS': [
             (torch.nn.CrossEntropyLoss(label_weights), 1),
         ],
