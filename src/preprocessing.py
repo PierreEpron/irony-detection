@@ -4,7 +4,7 @@ import random
 import re
 import demoji
 
-from src.tokenizer import cls_tokenize
+from src.tokenizer import cls_double_tokenize
 
 from sklearn.model_selection import StratifiedShuffleSplit
 
@@ -91,7 +91,7 @@ def make_dataset(dataset, n_annotators:int = None, equality = False, cleaning:li
 
 def filter_dataset(df, tokenizer, max_token=514):
 
-    df['n_tokens'] = df.apply(lambda x: len(cls_tokenize(tokenizer, x.parent_text, x.text).input_ids), axis = 1).squeeze()
+    df['n_tokens'] = df.apply(lambda x: len(cls_double_tokenize(tokenizer, x.parent_text, x.text).input_ids), axis = 1).squeeze()
 
     return df[df.n_tokens<max_token]
 
