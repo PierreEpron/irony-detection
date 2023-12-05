@@ -3,13 +3,11 @@ from datasets import Dataset, load_dataset
 from tqdm import tqdm
 import pandas as pd
 import torch
-import evaluate
-import copy
 
 from src.preprocessing import iter_splits, make_dataset, load_tweeteval
 from src.tokenizer import cls_double_tokenize
 from src.utils import write_jsonl
-from training import IronyTrainer
+from src.training import IronyTrainer
 
 def load_cls_model(model_name, method='acc', **kwargs):
     if method == 'acc':
