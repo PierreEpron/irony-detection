@@ -63,7 +63,7 @@ def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
         learning_rate=6e-5,
-        num_train_epochs=10,
+        num_train_epochs=1,
         save_strategy='epoch',
         save_total_limit=5,
         optim='adamw_torch',
@@ -88,14 +88,18 @@ def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
 
 def cls_inference(tokenizer, model, data):
     results = []
-
     softmax = torch.nn.Softmax(dim=-1)
-    model.eval() 
 
+    model.eval() 
     with torch.no_grad():
         for item in tqdm(data, 'CLS inference loop'):
-            outputs = model(**item)
+            print(item)
+            input_ids = torch.LongTensor([item['input_ids']]).to(model.device)
+            attention_mask = torch.LongTensor([item['attention_mask']]).to(model.device)
+
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
             scores = softmax(outputs.logits).detach().cpu().numpy()
+
             results.append({
                 'id_original': item['id_original'],
                 'scores': scores[0].tolist(),
@@ -150,8 +154,6 @@ def cls_run(
         val_set = Dataset.from_list(val).map(lambda x: tokenize_func(tokenizer, x))
         test_set = Dataset.from_list(test).map(lambda x: tokenize_func(tokenizer, x))
 
-        print(train_set[0])
-
         current_path = f"{config['OUTPUT_DIR']}_{current_split}"
         
         model = train_func(tokenizer, model, train_set, val_set, current_path, config['LOSS_FUNCS'])
@@ -165,7 +167,7 @@ def cls_run(
 def clm_run(
         config,
         load_data_func=cls_load_epic, 
-        inference_func=cls_inference):
+        inference_func=clm_random_inference):
 
     phrases, labels = load_phrases(config['CLM_PHRASES_PATH'])
 
