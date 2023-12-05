@@ -63,7 +63,7 @@ def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
         learning_rate=6e-5,
-        num_train_epochs=1,
+        num_train_epochs=10,
         save_strategy='epoch',
         save_total_limit=5,
         optim='adamw_torch',
@@ -93,7 +93,6 @@ def cls_inference(tokenizer, model, data):
     model.eval() 
     with torch.no_grad():
         for item in tqdm(data, 'CLS inference loop'):
-            print(item)
             input_ids = torch.LongTensor([item['input_ids']]).to(model.device)
             attention_mask = torch.LongTensor([item['attention_mask']]).to(model.device)
 
@@ -149,7 +148,7 @@ def cls_run(
         tokenizer = AutoTokenizer.from_pretrained(config['CLS_MODEL_NAME'], token=config['HF_TOKEN'])
         model = load_cls_model(config['CLS_MODEL_NAME'], method=config['LOAD_MODEL_METHOD'], token=config['HF_TOKEN'])
 
-        train, val, test = train[:2], val[:2], test[:2]
+        # train, val, test = train[:2], val[:2], test[:2]
         train_set = Dataset.from_list(train).map(lambda x: tokenize_func(tokenizer, x))
         val_set = Dataset.from_list(val).map(lambda x: tokenize_func(tokenizer, x))
         test_set = Dataset.from_list(test).map(lambda x: tokenize_func(tokenizer, x))
