@@ -1,6 +1,7 @@
 from src.utils import load_config
 from src.model import run
-from src.model import cls_load_tweeteval, cls_single_tokenize
+from src.model import cls_load_tweeteval
+from src.tokenizer import cls_single_tokenize
 from src.training import MCC_Loss
 
 
