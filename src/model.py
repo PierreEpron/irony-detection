@@ -63,7 +63,7 @@ def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
         learning_rate=6e-5,
-        num_train_epochs=10,
+        num_train_epochs=50,
         save_strategy='epoch',
         save_total_limit=5,
         optim='adamw_torch',
