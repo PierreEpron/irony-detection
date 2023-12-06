@@ -165,7 +165,7 @@ def cls_run(
 
 def clm_run(
         config,
-        load_data_func=cls_load_epic, 
+        load_data_func=clm_load_epic, 
         inference_func=clm_random_inference):
 
     phrases, labels = load_phrases(config['CLM_PHRASES_PATH'])
