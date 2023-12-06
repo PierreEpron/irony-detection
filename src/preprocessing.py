@@ -127,7 +127,7 @@ def iter_splits(splits_path, df):
 def load_tweeteval_set(name, path):
     X = (path / f'{name}_text.txt').read_text(encoding='utf-8').strip().split('\n')
     Y = (path / f'{name}_labels.txt').read_text(encoding='utf-8').strip().split('\n')
-    return [{'id_original':f'{name}_{i}', 'text':x, 'label':int(y)} for i, x, y in zip(list(range(len(X))),X,Y)]
+    return [{'id_original':f'{name}_{i}', 'text':x.replace('{', '(').replace('}', ')'), 'label':int(y)} for i, x, y in zip(list(range(len(X))),X,Y)]
 
 def load_tweeteval(path='data/tweet-eval/'):
     path = Path(str(path)) 
