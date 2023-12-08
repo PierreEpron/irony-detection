@@ -4,6 +4,11 @@ from pathlib import Path
 import random
 import re
 
+GEN_TURNS_TEMPLATE = [
+    {"role": "system", "content": "{system}"},
+    {"role": "user", "content": '{user}'},
+]
+
 TURNS_TEMPLATE = [
     {"role": "system", "content": "{system}"},
     {"role": "user", "content": '{user}'},
@@ -81,6 +86,8 @@ def generate_turns(item, phrases, tempate=TURNS_TEMPLATE):
         subs += _subs
     return turns, seed_phs, subs
 
+def generate_gen_turns(item, phrases):
+    return generate_turns(item, phrases, tempate=GEN_TURNS_TEMPLATE)
 
 def load_phrases(path):
     path = Path(path) if isinstance(path, str) else path
