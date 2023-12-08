@@ -1,7 +1,8 @@
 from transformers import AutoTokenizer
+from tqdm import tqdm
 
-from src.prompt import generate_gen_turns, load_phrases
 from src.model import clm_load_tweeteval, load_clm_model
+from src.prompt import generate_gen_turns, load_phrases
 from src.utils import load_config, write_jsonl
 
 def generate(model, inputs):
@@ -34,7 +35,7 @@ phrases, _ = load_phrases(config['CLM_PHRASES_PATH'])
 # item = data[0]
 results = []
 
-for item in data:
+for item in tqdm(data, "Generation loop:"):
     turns, seed_phs, subs = generate_gen_turns(item, phrases)
 
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
