@@ -37,8 +37,8 @@ phrases, _ = load_phrases(config['CLM_PHRASES_PATH'])
 # item = data[0]
 results = []
 
-if Path('tweeteval_base_open_single_zs.jsonl').is_file():
-    results = read_jsonl('tweeteval_base_open_single_zs.jsonl')
+if Path(config['RESULT_PATH']).is_file():
+    results = read_jsonl(config['RESULT_PATH'])
 
 for item in tqdm(data, "Generation loop:"):
 
