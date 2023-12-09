@@ -1,9 +1,10 @@
 from transformers import AutoTokenizer
+from pathlib import Path
 from tqdm import tqdm
 
 from src.model import clm_load_tweeteval, load_clm_model
 from src.prompt import generate_gen_turns, load_phrases
-from src.utils import load_config, write_jsonl
+from src.utils import load_config, read_jsonl, write_jsonl
 
 def generate(model, inputs):
     return model.generate(
@@ -35,7 +36,14 @@ phrases, _ = load_phrases(config['CLM_PHRASES_PATH'])
 # item = data[0]
 results = []
 
+if Path('tweeteval_base_open_single_zs.jsonl').is_file():
+    results = read_jsonl('tweeteval_base_open_single_zs.jsonl')
+
 for item in tqdm(data, "Generation loop:"):
+
+    if any(r['id_original'] == item['id_original'] for r in results):
+        continue
+
     turns, seed_phs, subs = generate_gen_turns(item, phrases)
 
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
