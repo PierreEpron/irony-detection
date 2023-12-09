@@ -32,7 +32,7 @@ tokenizer.use_default_system_prompt = False
 model = load_clm_model(config['CLM_MODEL_NAME'], method=config['LOAD_MODEL_METHOD'], token=config['HF_TOKEN'])
 model.eval()
 
-_, _, data = load_tweeteval(config)
+_, _, data = load_tweeteval()
 phrases, _ = load_phrases(config['CLM_PHRASES_PATH'])
 
 # item = data[0]
