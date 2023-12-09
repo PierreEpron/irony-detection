@@ -3,9 +3,10 @@ from pathlib import Path
 from tqdm import tqdm
 import time
 
-from src.model import clm_load_tweeteval, load_clm_model
+from src.model import load_clm_model
 from src.prompt import generate_gen_turns, load_phrases
 from src.utils import load_config, read_jsonl, write_jsonl
+from src.preprocessing import load_tweeteval
 
 def generate(model, inputs):
     return model.generate(
@@ -14,13 +15,13 @@ def generate(model, inputs):
         top_p=0.95,
         repetition_penalty=1.2,
         top_k=50,
-        max_new_tokens=1024,
+        max_new_tokens=512,
     )
 
 
 config = load_config()
 config = config | {
-    'RESULT_PATH':"results/tweeteval_base_open_single_zs.jsonl",
+    'RESULT_PATH':"results/tweeteval_base_open_test_zs.jsonl",
     'CLM_PHRASES_PATH':"src/prompts/gen_single_phrases.json"
 }
 
@@ -31,7 +32,7 @@ tokenizer.use_default_system_prompt = False
 model = load_clm_model(config['CLM_MODEL_NAME'], method=config['LOAD_MODEL_METHOD'], token=config['HF_TOKEN'])
 model.eval()
 
-data = clm_load_tweeteval(config)
+_, _, data = load_tweeteval(config)
 phrases, _ = load_phrases(config['CLM_PHRASES_PATH'])
 
 # item = data[0]
@@ -54,7 +55,7 @@ for item in tqdm(data, "Generation loop:"):
 
     turns.extend([
         {"role": "assistant", "content":tokenizer.decode(outputs[0][inputs.shape[-1]:], skip_special_tokens=True)},
-        {"role": "user", "content":"List the keywords that led you to your conclusion."},
+        {"role": "user", "content":"Answer only yes or no."},
     ])
 
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
