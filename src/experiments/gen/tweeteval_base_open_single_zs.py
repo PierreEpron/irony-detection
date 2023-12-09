@@ -1,6 +1,7 @@
 from transformers import AutoTokenizer
 from pathlib import Path
 from tqdm import tqdm
+import time
 
 from src.model import clm_load_tweeteval, load_clm_model
 from src.prompt import generate_gen_turns, load_phrases
@@ -44,6 +45,8 @@ for item in tqdm(data, "Generation loop:"):
     if any(r['id_original'] == item['id_original'] for r in results):
         continue
 
+    start_time = time.time()
+
     turns, seed_phs, subs = generate_gen_turns(item, phrases)
 
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
@@ -64,7 +67,8 @@ for item in tqdm(data, "Generation loop:"):
         'turns':turns, 
         'seed_phs':seed_phs,
         'subs':subs,
-        'outputs':tokenizer.decode(outputs[0])
+        'outputs':tokenizer.decode(outputs[0]),
+        'duration': time.time() - start_time
     })
 
     write_jsonl(config['RESULT_PATH'], results)
