@@ -15,6 +15,7 @@ if __name__ == "__main__":
     config = config | {
         'OUTPUT_DIR':"results/tweeteval_wce", 
         'RESULT_PATH':"results/tweeteval_wce.jsonl",
+        'CLS_MODEL_NAME':'cardiffnlp/twitter-roberta-large-2022-154m',
         'LOSS_FUNCS': [
             (torch.nn.BCELoss(), 1),
         ],

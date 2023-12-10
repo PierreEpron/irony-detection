@@ -10,6 +10,7 @@ if __name__ == "__main__":
     config = config | {
         'OUTPUT_DIR':"results/tweeteval_mcc", 
         'RESULT_PATH':"results/tweeteval_mcc.jsonl",
+        'CLS_MODEL_NAME':'cardiffnlp/twitter-roberta-large-2022-154m',
         'LOSS_FUNCS': [
             (MCC_Loss(), 1), 
         ],
