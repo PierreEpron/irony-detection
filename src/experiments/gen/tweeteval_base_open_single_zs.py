@@ -12,7 +12,7 @@ def generate(model, inputs):
     return model.generate(
         inputs,
         temperature=0.6,
-        top_p=0.95,
+        top_p=0.9,
         repetition_penalty=1.2,
         top_k=50,
         max_new_tokens=512,
