@@ -25,7 +25,6 @@ def generate(model, inputs):
 config = load_config()
 config = config | {
     'RESULT_PATH':"results/tweeteval_rate_open_test_zs.jsonl",
-    'CLM_PHRASES_PATH':"src/prompts/gen_single_phrases.json"
 }
 
 tokenizer = AutoTokenizer.from_pretrained(config['CLM_MODEL_NAME'], token=config['HF_TOKEN'])
@@ -36,7 +35,6 @@ model = load_clm_model(config['CLM_MODEL_NAME'], method=config['LOAD_MODEL_METHO
 model.eval()
 
 _, _, data = load_tweeteval()
-phrases, _ = load_phrases(config['CLM_PHRASES_PATH'])
 
 # item = data[0]
 results = []
