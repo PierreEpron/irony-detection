@@ -56,13 +56,13 @@ def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
     
     training_args = TrainingArguments(
         output_dir=current_path,
-        do_train =True,
+        do_train=True,
         do_eval=True,
         evaluation_strategy='epoch',
         prediction_loss_only=False,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=16,
-        learning_rate=6e-5,
+        per_device_train_batch_size=32,
+        per_device_eval_batch_size=32,
+        learning_rate=1e-4,
         num_train_epochs=50,
         save_strategy='epoch',
         save_total_limit=5,
