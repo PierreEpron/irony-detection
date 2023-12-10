@@ -8,7 +8,7 @@ from src.prompt import generate_gen_turns, load_phrases
 from src.utils import load_config, read_jsonl, write_jsonl
 from src.preprocessing import load_tweeteval
 
-N = 10
+N = 100
 
 def generate(model, inputs):
     return model.generate(
@@ -24,7 +24,7 @@ def generate(model, inputs):
 
 config = load_config()
 config = config | {
-    'RESULT_PATH':"results/tweeteval_rate10_open_test_zs.jsonl",
+    'RESULT_PATH':"results/tweeteval_rate{n}_open_test_zs.jsonl".format(n=N),
 }
 
 tokenizer = AutoTokenizer.from_pretrained(config['CLM_MODEL_NAME'], token=config['HF_TOKEN'])
