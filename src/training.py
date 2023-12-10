@@ -67,7 +67,7 @@ class IronyTrainer(Trainer):
         labels = inputs.pop("labels")
         # Forward
         outputs = model(**inputs)
-        logits = nn.functional.sigmoid(outputs["logits"])
+        logits = torch.sigmoid(outputs["logits"])
         # compue loss and sum their weight 
         loss = sum([f(logits[..., 1].float(), labels.float()) * w for f, w in self.loss_funcs])
         return (loss, outputs) if return_outputs else loss
