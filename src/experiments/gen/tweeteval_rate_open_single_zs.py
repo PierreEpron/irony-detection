@@ -24,7 +24,7 @@ def generate(model, inputs):
 
 config = load_config()
 config = config | {
-    'RESULT_PATH':"results/tweeteval_rate_open_test_zs.jsonl",
+    'RESULT_PATH':"results/tweeteval_rate10_open_test_zs.jsonl",
 }
 
 tokenizer = AutoTokenizer.from_pretrained(config['CLM_MODEL_NAME'], token=config['HF_TOKEN'])
