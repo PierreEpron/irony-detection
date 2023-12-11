@@ -21,6 +21,9 @@ if __name__ == "__main__":
             config = config | {
                 'OUTPUT_DIR':path, 
                 'RESULT_PATH':f"{path}.jsonl",
+                'CLS_BATCH_SIZE':bs,
+                'CLS_LR':lr,
+                'CLS_EPOCHS':50
             }
             cls_run(config, load_data_func=cls_load_tweeteval, tokenize_func=cls_single_tokenize)
 
