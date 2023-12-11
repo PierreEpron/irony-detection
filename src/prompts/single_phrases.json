@@ -1,0 +1,44 @@
+{
+    "labels": [
+        {"text": "yes or no", "values":["no", "yes"]},
+        {"text": "'yes' or 'no'", "values":["no", "yes"]},
+        {"text": "true or false", "values":["false", "true"]}
+    ],
+    "system": [
+        {"text": "You are a helpful assistant."},
+        {"text": "You are {system_user} user."},
+        {"text": "You are a linguist expert in irony"}
+    ],
+    "user": [
+        {"text": "{intro}{question}{format}"}
+    ],
+    "assistant": [
+        {"text": "The answer to your question is"},
+        {"text": "The answer is"}
+    ],
+    "intro": [
+        {"text": "Below is a sentence{input}"},
+        {"text": "Below is an input{input}"},
+        {"text": "Below is an utterance of a discussion{input}"},
+        {"text": "{input}"}
+    ],
+    "input": [
+        {"text": ".\n\nSentence: {text}\n\n"},
+        {"text":": {text}\n\n"}
+    ],
+    "question": [
+        {"text": "Is this sentence ironic?"},
+        {"text": "Is this input ironic?"},
+        {"text": "Is this utterance ironic?"}
+    ],
+    "format": [
+        {"text": "Answer by {labels}."},
+        {"text": "Provide a {labels} based on the likelihood of irony in User A's statement."}
+    ],
+    "system_user": [
+        {"text": "a reddit"},
+        {"text": "a twitter"},
+        {"text": "a social media"},
+        {"text": "an internet"}
+    ]
+}
