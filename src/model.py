@@ -52,7 +52,7 @@ def clm_load_tweeteval(config):
     train, val, test = load_tweeteval()
     return train + val + test
 
-def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
+def cls_train(config, tokenizer, model, train, val, current_path, loss_funcs):
     
     training_args = TrainingArguments(
         output_dir=current_path,
@@ -60,10 +60,10 @@ def cls_train(tokenizer, model, train, val, current_path, loss_funcs):
         do_eval=True,
         evaluation_strategy='epoch',
         prediction_loss_only=False,
-        per_device_train_batch_size=32,
-        per_device_eval_batch_size=32,
-        learning_rate=1e-4,
-        num_train_epochs=50,
+        per_device_train_batch_size=config['CLS_BATCH_SIZE'],
+        per_device_eval_batch_size=config['CLS_BATCH_SIZE'],
+        learning_rate=config['CLS_LR'],
+        num_train_epochs=config['CLS_EPOCHS'],
         save_strategy='epoch',
         save_total_limit=5,
         optim='adamw_torch',
@@ -155,7 +155,7 @@ def cls_run(
 
         current_path = f"{config['OUTPUT_DIR']}_{current_split}"
         
-        model = train_func(tokenizer, model, train_set, val_set, current_path, config['LOSS_FUNCS'])
+        model = train_func(config, tokenizer, model, train_set, val_set, current_path, config['LOSS_FUNCS'])
         
         results.append(inference_func(tokenizer, model, test_set))
         
