@@ -24,7 +24,7 @@ def decode_answer(tokenizer, outputs):
     return tokenizer.decode(outputs[0][inputs.shape[-1]:], skip_special_tokens=True)
 
 def classify(answer, labels={'no':0, 'yes':1}):
-    for k, v in labels:
+    for k, v in labels.items():
         if answer.lower().startswith(k):
             return v
     return -1
