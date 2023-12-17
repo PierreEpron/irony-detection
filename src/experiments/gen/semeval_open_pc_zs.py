@@ -21,7 +21,7 @@ def generate(model, inputs):
     )
 
 def decode_answer(tokenizer, outputs):
-    return tokenizer.decode(outputs[0][inputs.shape[-1]:], skip_special_tokens=True)
+    return tokenizer.decode(outputs[0][inputs.shape[-1]:], skip_special_tokens=True).strip()
 
 def classify(answer, labels={'no':0, 'yes':1}):
     for k, v in labels.items():
