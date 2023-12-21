@@ -14,16 +14,16 @@ if __name__ == "__main__":
         ],
     }
 
-    for bs in [16, 32, 48]:
-        for lr in [1e-3, 1e-4, 1e-5]:    
-            lr_n = f'{lr:e}'[-1]
+    for bs in [16, 32, 48, 64]:
+        for lr in [5e-5, 1e-5, 5e-6]:    
+            lr_n = f'{lr:e}'
             path = f"results/tweeteval_{bs}_{lr_n}_mcc"
             config = config | {
                 'OUTPUT_DIR':path, 
                 'RESULT_PATH':f"{path}.jsonl",
                 'CLS_BATCH_SIZE':bs,
                 'CLS_LR':lr,
-                'CLS_EPOCHS':50
+                'CLS_EPOCHS':30
             }
             cls_run(config, load_data_func=cls_load_tweeteval, tokenize_func=cls_single_tokenize)
 
