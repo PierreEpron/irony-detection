@@ -11,7 +11,7 @@ results_path = repo_path / 'results'
 
 def get_new_path(path):
     print(path, path.parts[:2], path.parts[:3])
-    return Path('/'.join(path.parts[:2] + path.parts[:3]))
+    return Path('/'.join(path.parts[:2] + path.parts[3:]))
 
 for path in results_path.glob(f'{prefix}*'):
     if path.is_dir():
