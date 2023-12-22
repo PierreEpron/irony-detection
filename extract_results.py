@@ -16,7 +16,7 @@ for path in results_path.glob(f'{prefix}*'):
     if path.is_dir():
         ts_path = path / 'trainer_state.json'
         cp_path = repo_path / json.loads(ts_path.read_text())['best_model_checkpoint']
-        jsonl_path = path.with_suffix('jsonl')
+        jsonl_path = path.with_suffix('.jsonl')
         shutil.copyfile(ts_path, get_new_path(ts_path))
         shutil.copytree(cp_path, get_new_path(cp_path))
         shutil.copyfile(jsonl_path, get_new_path(jsonl_path))
