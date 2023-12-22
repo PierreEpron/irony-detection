@@ -14,7 +14,7 @@ for path in results_path.glob(f'{prefix}*'):
         ts_path = path / 'trainer_state.json'
         cp_path = repo_path / json.loads(ts_path.read_text())['best_model_checkpoint']
         jsonl_path = path.with_suffix('.jsonl')
-        shutil.copyfile(ts_path, home_path / f'{ts_path.parts[-2]}_state.json')
+        shutil.copyfile(ts_path, home_path / f'{ts_path.parts[-3]}_state.json')
         shutil.copytree(cp_path, home_path / cp_path.parts[-1])
         shutil.copyfile(jsonl_path, home_path / jsonl_path.parts[-1])
         shutil.rmtree(path)
