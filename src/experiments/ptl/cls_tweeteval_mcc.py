@@ -116,8 +116,8 @@ train_set = Dataset.from_list(data[0][0]).map(lambda x: cls_single_tokenize(toke
 val_set = Dataset.from_list(data[0][1]).map(lambda x: cls_single_tokenize(tokenizer, x))
 test_set = Dataset.from_list(data[0][2]).map(lambda x: cls_single_tokenize(tokenizer, x))
 
-train_dataloader = DataLoader(train_set, batch_size=16, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id), shuffle=True)
-val_dataloader = DataLoader(val_set, batch_size=16, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id))
+train_dataloader = DataLoader(train_set, batch_size=BATCH_SIZE, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id), shuffle=True)
+val_dataloader = DataLoader(val_set, batch_size=BATCH_SIZE, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id))
 test_dataloader = DataLoader(test_set, batch_size=1, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id))
 
 model = IronyDetectionFineTuner('cardiffnlp/twitter-roberta-large-2022-154m', MCC_Loss(), learning_rate=LEARNING_RATE)
