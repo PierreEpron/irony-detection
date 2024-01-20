@@ -35,7 +35,6 @@ class MCC_Loss(nn.Module):
 
         # Adding 1 to the denominator to avoid divide-by-zero errors.
         mcc = torch.div(numerator.sum(), denominator.sum() + 1.0)
-        print(numerator.sum(), denominator.sum() + 1.0, mcc)
         return 1 - mcc
 
     # def forward(self, inputs, targets):
