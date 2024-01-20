@@ -129,7 +129,7 @@ trainer = Trainer(
     log_every_n_steps=50, 
     logger=[tb_logger, csv_logger],
     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
-    accelerator="gpu", devices=8, strategy="ddp"
+    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
 )
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
