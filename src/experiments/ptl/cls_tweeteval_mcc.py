@@ -17,7 +17,7 @@ from src.training import MCC_Loss
 
 torch.set_float32_matmul_precision('medium')
 
-EPOCHS = 20
+EPOCHS = 50
 BATCH_SIZE = 32
 LEARNING_RATE = 1e-5
 RESULT_PATH = Path('results/plt_test')
@@ -110,9 +110,9 @@ class IronyDetectionFineTuner(LightningModule):
 tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-large-2022-154m")
 
 data = cls_load_tweeteval({})
-train_set = Dataset.from_list(data[0][0][:16]).map(lambda x: cls_single_tokenize(tokenizer, x))
-val_set = Dataset.from_list(data[0][1][:16]).map(lambda x: cls_single_tokenize(tokenizer, x))
-test_set = Dataset.from_list(data[0][2][:16]).map(lambda x: cls_single_tokenize(tokenizer, x))
+train_set = Dataset.from_list(data[0][0]).map(lambda x: cls_single_tokenize(tokenizer, x))
+val_set = Dataset.from_list(data[0][1]).map(lambda x: cls_single_tokenize(tokenizer, x))
+test_set = Dataset.from_list(data[0][2]).map(lambda x: cls_single_tokenize(tokenizer, x))
 
 train_dataloader = DataLoader(train_set, batch_size=16, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id))
 val_dataloader = DataLoader(val_set, batch_size=16, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id))
@@ -121,12 +121,13 @@ test_dataloader = DataLoader(test_set, batch_size=1, collate_fn=DataCollatorWith
 model = IronyDetectionFineTuner('cardiffnlp/twitter-roberta-large-2022-154m', MCC_Loss(), learning_rate=LEARNING_RATE)
 
 trainer = Trainer(
-    default_root_dir="results/",
+    default_root_dir=RESULT_PATH,
     max_epochs=EPOCHS, 
     log_every_n_steps=50, 
     callbacks=[EarlyStopping(monitor="val_loss", mode="min")]
 )
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
-predictions = trainer.predict(model, test_dataloader)
+predictions = trainer.predict(model, test_dataloader, ckpt_path='best')
+
 write_jsonl(RESULT_PATH / 'predictions.jsonl', predictions)
