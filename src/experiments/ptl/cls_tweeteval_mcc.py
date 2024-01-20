@@ -85,13 +85,12 @@ class IronyDetectionFineTuner(LightningModule):
     
     def training_step(self, batch, batch_idx):
         outputs = self.model(batch['input_ids'], batch['attention_mask'])
-        print(outputs['logits'], torch.sigmoid(outputs['logits']))
         loss = self.loss_func(torch.sigmoid(outputs['logits']), batch['label'].float())
         return loss
     
     def validation_step(self, batch, batch_idx):    
         outputs = self.model(batch['input_ids'], batch['attention_mask'])
-        val_loss = self.loss_func(outputs['logits'].float(), batch['label'].float())
+        val_loss = self.loss_func(torch.sigmoid(outputs['logits']), batch['label'].float())
         self.log("val_loss", val_loss, batch_size=1)
 
     def predict_step(self, batch, batch_idx):
@@ -121,8 +120,8 @@ test_dataloader = DataLoader(test_set, batch_size=1, collate_fn=DataCollatorWith
 
 model = IronyDetectionFineTuner('cardiffnlp/twitter-roberta-large-2022-154m', MCC_Loss(), learning_rate=LEARNING_RATE)
 
-tb_logger = TensorBoardLogger("tb_logs", name="mcc")
-csv_logger = CSVLogger("cv_logs", name="mcc")
+tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="mcc")
+csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="mcc")
 
 trainer = Trainer(
     default_root_dir=RESULT_PATH,
