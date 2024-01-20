@@ -84,17 +84,17 @@ class IronyDetectionFineTuner(LightningModule):
         return outputs
     
     def training_step(self, batch, batch_idx):
-        outputs = self.model(batch['input_ids'], batch['attention_mask'])
+        outputs = self.forward(batch['input_ids'], batch['attention_mask'])
         loss = self.loss_func(outputs['scores'], batch['label'].float())
         return loss
     
     def validation_step(self, batch, batch_idx):    
-        outputs = self.model(batch['input_ids'], batch['attention_mask'])
+        outputs = self.forward(batch['input_ids'], batch['attention_mask'])
         val_loss = self.loss_func(outputs['scores'], batch['label'].float())
         self.log("val_loss", val_loss, batch_size=1)
 
     def predict_step(self, batch, batch_idx):
-        outputs = self.model(batch['input_ids'], batch['attention_mask'])
+        outputs = self.forward(batch['input_ids'], batch['attention_mask'])
         return {
             'id_original':batch['id_original'][0], 
             'text':batch['text'], 
