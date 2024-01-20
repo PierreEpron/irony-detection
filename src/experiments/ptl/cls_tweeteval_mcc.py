@@ -128,7 +128,9 @@ trainer = Trainer(
     max_epochs=EPOCHS, 
     log_every_n_steps=50, 
     logger=[tb_logger, csv_logger],
-    callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")]
+    callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
+    gpus=2, 
+    strategy="ddp"
 )
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
