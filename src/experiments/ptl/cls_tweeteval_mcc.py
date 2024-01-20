@@ -128,6 +128,8 @@ trainer = Trainer(
 )
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
-predictions = trainer.predict(model, test_dataloader, ckpt_path='best')
 
+model.model.save_pretrained(RESULT_PATH)
+
+predictions = trainer.predict(model, test_dataloader, ckpt_path='best')
 write_jsonl(RESULT_PATH / 'predictions.jsonl', predictions)
