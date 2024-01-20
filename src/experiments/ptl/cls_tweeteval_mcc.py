@@ -18,7 +18,7 @@ from src.utils import write_jsonl
 from src.training import MCC_Loss
 
 EPOCHS = 50
-BATCH_SIZE = 24
+BATCH_SIZE = 32
 LEARNING_RATE = 1e-5
 RESULT_PATH = Path('results/plt_test')
 
@@ -129,6 +129,8 @@ trainer = Trainer(
     log_every_n_steps=50, 
     logger=[tb_logger, csv_logger],
     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
+    gpus=8, 
+    strategy="ddp_sharded",
 )
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
