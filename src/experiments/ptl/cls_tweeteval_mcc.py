@@ -91,7 +91,7 @@ class IronyDetectionFineTuner(LightningModule):
     def validation_step(self, batch, batch_idx):    
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
         val_loss = self.loss_func(outputs['logits'], batch['label'].float())
-        self.log("val_loss", val_loss, batch_size=1)
+        self.log("val_loss", val_loss, batch_size=1, sync_dist=True)
 
     def predict_step(self, batch, batch_idx):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
@@ -126,7 +126,7 @@ csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="mcc")
 trainer = Trainer(
     default_root_dir=RESULT_PATH,
     max_epochs=EPOCHS, 
-    log_every_n_steps=50, 
+    log_every_n_steps=1, 
     logger=[tb_logger, csv_logger],
     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
     accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
