@@ -18,8 +18,8 @@ from src.utils import write_jsonl
 from src.training import MCC_Loss
 
 EPOCHS = 50
-BATCH_SIZE = 32
-LEARNING_RATE = 1e-5
+BATCH_SIZE = 64
+LEARNING_RATE = 1e-6
 RESULT_PATH = Path('results/plt_test')
 
 if not RESULT_PATH.is_dir():
