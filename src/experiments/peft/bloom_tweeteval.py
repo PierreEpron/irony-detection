@@ -71,6 +71,7 @@ class CLMFineTuner(LightningModule):
         super().__init__()
         self.peft_config = peft_config
         self.eos_token_id = eos_token_id
+        self.learning_rate = learning_rate
 
         self.model = AutoModelForCausalLM.from_pretrained(base_model_name)
         self.model = get_peft_model(self.model, peft_config)
