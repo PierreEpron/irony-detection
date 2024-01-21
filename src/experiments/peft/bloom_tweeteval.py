@@ -16,7 +16,7 @@ EPOCHS = 50
 IDX_2_LABEL = {0:"no ironic", 1:"ironic"}
 BATCH_SIZE = 16
 MODEL_NAME = "bigscience/bloomz-560m"
-MAX_LEN = 300
+MAX_LEN = 305
 
 RESULT_PATH = Path('results/peft_test')
 
@@ -37,6 +37,7 @@ def tokenize(tokenizer, x, train=True):
     label_inputs = tokenizer(IDX_2_LABEL[x['label']], add_special_tokens=False)    
     text_ids = [tokenizer.bos_token_id] + text_inputs['input_ids']
     label_ids = label_inputs['input_ids'] + [tokenizer.eos_token_id]
+
 
     if train == True: 
         input_ids = text_ids + label_ids
@@ -63,8 +64,16 @@ train_dataloader = DataLoader(train_set, shuffle=True, collate_fn=default_data_c
 val_dataloader = DataLoader(val_set, shuffle=True, collate_fn=default_data_collator, batch_size=BATCH_SIZE)
 test_dataloader = DataLoader(test_set, shuffle=True, collate_fn=default_data_collator, batch_size=1)
 
-batch_sample = next(iter(train_dataloader))
-test_sample = next(iter(test_dataloader))
+# validate loaders
+# batch_sample = list(iter(train_dataloader))
+# batch_sample = list(iter(val_dataloader))
+# test_sample = list(iter(test_dataloader))
+
+# batch_sample = next(iter(train_dataloader))
+# test_sample = next(iter(test_dataloader))
+
+# print(batch_sample)
+# print(test_sample)
 
 class CLMFineTuner(LightningModule):
     def __init__(self, base_model_name, peft_config, eos_token_id, learning_rate=3e-2):
