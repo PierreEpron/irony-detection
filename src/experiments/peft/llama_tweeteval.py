@@ -123,7 +123,7 @@ trainer = Trainer(
     log_every_n_steps=1, 
     logger=[tb_logger, csv_logger],
     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
-    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
+    accelerator="gpu", devices=8, strategy="deepspeed_stage_2_offload", precision=16
 )
 
 
