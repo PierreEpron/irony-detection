@@ -10,7 +10,7 @@ import torch
 from pathlib import Path
 
 from src.model import cls_load_tweeteval
-from utils import write_jsonl
+from src.utils import write_jsonl
 
 EPOCHS = 50
 IDX_2_LABEL = {0:"no ironic", 1:"ironic"}
