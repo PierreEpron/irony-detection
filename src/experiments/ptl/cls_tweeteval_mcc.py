@@ -82,7 +82,7 @@ class IronyDetectionFineTuner(LightningModule):
     def forward(self, input_ids, attention_mask):
         outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
         # outputs['logits'] = torch.sigmoid(outputs["logits"])
-        outputs['logits'] = torch.softmax(outputs["logits"])
+        outputs['logits'] = torch.softmax(outputs["logits"], dim=-1)
         return outputs
     
     def training_step(self, batch, batch_idx):
