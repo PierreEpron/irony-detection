@@ -16,7 +16,7 @@ config = load_config()
 
 EPOCHS = 50
 IDX_2_LABEL = {0:"no ironic", 1:"ironic"}
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 MODEL_NAME = "meta-llama/Llama-2-7b-hf"
 MAX_LEN = 305
 
