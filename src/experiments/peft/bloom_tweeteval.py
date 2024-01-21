@@ -93,7 +93,7 @@ class CLMFineTuner(LightningModule):
     def validation_step(self, batch, batch_idx):    
         outputs = self.model(**batch)
         val_loss = outputs.loss
-        self.log("val_loss", val_loss, batch_size=batch.shape[0], sync_dist=True)
+        self.log("val_loss", val_loss, batch_size=batch['input_ids'].shape[0], sync_dist=True)
 
     def predict_step(self, batch, batch_idx):
         outputs = self.model.generate(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"], max_new_tokens=10, eos_token_id=self.eos_token_id)
@@ -120,6 +120,7 @@ trainer = Trainer(
     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
     accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
 )
+
 
 trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 
