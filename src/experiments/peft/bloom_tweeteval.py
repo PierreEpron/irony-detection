@@ -60,9 +60,9 @@ train_set = Dataset.from_list(data[0][0]).map(lambda x: tokenize(tokenizer, x))
 val_set = Dataset.from_list(data[0][1]).map(lambda x: tokenize(tokenizer, x))
 test_set = Dataset.from_list(data[0][2]).map(lambda x: tokenize(tokenizer, x, train=False))
 
-train_dataloader = DataLoader(train_set, shuffle=True, collate_fn=default_data_collator, batch_size=BATCH_SIZE)
-val_dataloader = DataLoader(val_set, shuffle=True, collate_fn=default_data_collator, batch_size=BATCH_SIZE)
-test_dataloader = DataLoader(test_set, shuffle=True, collate_fn=default_data_collator, batch_size=1)
+train_dataloader = DataLoader(train_set, collate_fn=default_data_collator, batch_size=BATCH_SIZE, shuffle=True)
+val_dataloader = DataLoader(val_set, collate_fn=default_data_collator, batch_size=BATCH_SIZE)
+test_dataloader = DataLoader(test_set, collate_fn=default_data_collator, batch_size=1)
 
 # validate loaders
 # batch_sample = list(iter(train_dataloader))
