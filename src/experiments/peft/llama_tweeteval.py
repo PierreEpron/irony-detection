@@ -6,7 +6,7 @@ from lightning import LightningModule, Trainer
 from torch.utils.data import DataLoader
 from datasets import Dataset
 import torch
-
+from deepspeed.ops.adam import DeepSpeedCPUAdam
 from pathlib import Path
 
 from src.model import cls_load_tweeteval
@@ -109,7 +109,7 @@ class CLMFineTuner(LightningModule):
         }
     
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        optimizer = DeepSpeedCPUAdam(self.parameters(), lr=self.learning_rate)
         return optimizer
 
 tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="llama")
