@@ -99,10 +99,10 @@ class IronyDetectionFineTuner(LightningModule):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
         return {
             'id_original':batch['id_original'][0], 
-            'text':batch['text'], 
+            'text':batch['text'][0], 
             'gold':batch['label'].item(), 
-            'pred':int(outputs['logits'] > .5), 
-            'score':outputs['logits'].item()
+            'pred':outputs['logits'].argmax().item(), 
+            'score':outputs['logits'].tolist()[0]
         }
 
     def configure_optimizers(self):
