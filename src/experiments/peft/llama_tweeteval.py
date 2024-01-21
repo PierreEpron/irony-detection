@@ -20,7 +20,7 @@ BATCH_SIZE = 16
 MODEL_NAME = "meta-llama/Llama-2-7b-hf"
 MAX_LEN = 305
 
-RESULT_PATH = Path('results/peft_test')
+RESULT_PATH = Path('results/peft_llama')
 
 if not RESULT_PATH.is_dir():
     RESULT_PATH.mkdir()
@@ -109,8 +109,8 @@ class CLMFineTuner(LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
 
-tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="peft")
-csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="peft")
+tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="llama")
+csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="llama")
 
 finetuner = CLMFineTuner(MODEL_NAME, peft_config, tokenizer.eos_token_id)
 
