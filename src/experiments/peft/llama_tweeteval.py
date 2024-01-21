@@ -57,6 +57,9 @@ def tokenize(tokenizer, x, train=True):
         
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=config['HF_TOKEN'])
 
+if tokenizer.pad_token_id is None:
+    tokenizer.pad_token_id = tokenizer.eos_token_id
+
 data = cls_load_tweeteval({})
 train_set = Dataset.from_list(data[0][0]).map(lambda x: tokenize(tokenizer, x))
 val_set = Dataset.from_list(data[0][1]).map(lambda x: tokenize(tokenizer, x))
