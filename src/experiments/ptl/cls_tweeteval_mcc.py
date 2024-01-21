@@ -74,25 +74,26 @@ class DataCollatorWithPadding:
 class IronyDetectionFineTuner(LightningModule):
     def __init__(self, base_model_name, loss_func, learning_rate):
         super().__init__()
-        self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=1)
+        # self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=1)
+        self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=2)
         self.loss_func = loss_func
         self.learning_rate = learning_rate
 
     def forward(self, input_ids, attention_mask):
         outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
-        outputs['logits'] = torch.sigmoid(outputs["logits"])
+        # outputs['logits'] = torch.sigmoid(outputs["logits"])
+        outputs['logits'] = torch.softmax(outputs["logits"])
         return outputs
     
     def training_step(self, batch, batch_idx):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
-        loss = self.loss_func(outputs['logits'], batch['label'].float())
+        loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
         return loss
     
     def validation_step(self, batch, batch_idx):    
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
-        val_loss = self.loss_func(outputs['logits'], batch['label'].float())
-        print(outputs['logits'], batch['label'].float(), val_loss)
-        self.log("val_loss", val_loss, batch_size=1, reduce_fx=torch.sum, sync_dist=True)
+        val_loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
+        self.log("val_loss", val_loss, batch_size=1, sync_dist=True)
 
     def predict_step(self, batch, batch_idx):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
