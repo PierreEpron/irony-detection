@@ -19,22 +19,23 @@ BATCH_SIZE = 4
 MODEL_NAME = "meta-llama/Llama-2-7b-hf"
 MAX_LEN = 100
 
+PROMPT = "Below is an instruction that describes a text classification\n\n### Instruction:\nClassify if the following tweet tweet is ironic or not\n\n### Input:\n{input}\n\n### Response:\n"
 RESULT_PATH = Path('results/peft_llama')
 
 if not RESULT_PATH.is_dir():
     RESULT_PATH.mkdir()
 
+
 peft_config = PromptTuningConfig(
     task_type=TaskType.CAUSAL_LM,
     prompt_tuning_init=PromptTuningInit.TEXT,
-    num_virtual_tokens=4,
-    prompt_tuning_init_text="Classify if the tweet is ironic or not:",
+    num_virtual_tokens=20,
     tokenizer_name_or_path=MODEL_NAME,
 )
 
 def tokenize(tokenizer, x, train=True):
 
-    text_inputs = tokenizer(f"Tweet text : {x['text']} Label : ", add_special_tokens=False)
+    text_inputs = tokenizer(PROMPT.format(input=x['text']), add_special_tokens=False)
     label_inputs = tokenizer(IDX_2_LABEL[x['label']], add_special_tokens=False)    
     text_ids = [tokenizer.bos_token_id] + text_inputs['input_ids']
     label_ids = label_inputs['input_ids'] + [tokenizer.eos_token_id]
