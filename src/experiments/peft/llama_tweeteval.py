@@ -15,7 +15,7 @@ config = load_config()
 
 EPOCHS = 50
 IDX_2_LABEL = {0:"no ironic", 1:"ironic"}
-BATCH_SIZE = 8
+BATCH_SIZE = 4
 MODEL_NAME = "meta-llama/Llama-2-7b-hf"
 MAX_LEN = 100
 
@@ -70,7 +70,7 @@ def make_loader(data, tokenizer, batch_size, train=True, shuffle=False):
         data_set = data_set.map(lambda x: pad_tokens(tokenizer, x))
 
     # Uncomment to print original len vs filtered len
-    # print(f'{len(data)}/{len(data_set)} ({len(data_set)/len(data):.3f})')
+    print(f'{len(data)}/{len(data_set)} ({len(data_set)/len(data):.3f})')
         
     return DataLoader(data_set, collate_fn=default_data_collator, batch_size=batch_size, shuffle=shuffle)
         
