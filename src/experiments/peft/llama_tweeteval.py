@@ -27,7 +27,7 @@ if not RESULT_PATH.is_dir():
 peft_config = PromptTuningConfig(
     task_type=TaskType.CAUSAL_LM,
     prompt_tuning_init=PromptTuningInit.TEXT,
-    num_virtual_tokens=8,
+    num_virtual_tokens=4,
     prompt_tuning_init_text="Classify if the tweet is ironic or not:",
     tokenizer_name_or_path=MODEL_NAME,
 )
