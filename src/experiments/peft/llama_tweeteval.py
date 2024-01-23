@@ -17,7 +17,7 @@ EPOCHS = 50
 IDX_2_LABEL = {0:"no ironic", 1:"ironic"}
 BATCH_SIZE = 8
 MODEL_NAME = "meta-llama/Llama-2-7b-hf"
-MAX_LEN = 305
+MAX_LEN = 100
 
 RESULT_PATH = Path('results/peft_llama')
 
@@ -39,13 +39,12 @@ def tokenize(tokenizer, x, train=True):
     text_ids = [tokenizer.bos_token_id] + text_inputs['input_ids']
     label_ids = label_inputs['input_ids'] + [tokenizer.eos_token_id]
 
-
     if train == True: 
         input_ids = text_ids + label_ids
         return { 
-            'input_ids': [tokenizer.pad_token_id] * (MAX_LEN - len(input_ids)) + input_ids,
-            'attention_mask': [0] * (MAX_LEN - len(input_ids)) + [1] * len(input_ids),  
-            "labels": [-100] * (MAX_LEN - len(label_ids)) + label_ids
+            'input_ids': input_ids,
+            'attention_mask': [1] * len(input_ids),  
+            "labels": [-100] * (len(input_ids) - len(label_ids)) + label_ids
         }
     else:
         return {
@@ -53,30 +52,49 @@ def tokenize(tokenizer, x, train=True):
             'attention_mask': [1] * len(text_ids),  
             "labels": label_ids
         }
+
+def pad_tokens(tokenizer, x):
+    pad_size = MAX_LEN - len(x['input_ids'])
+    return { 
+        'input_ids': [tokenizer.pad_token_id] * pad_size + x['input_ids'],
+        'attention_mask': [1] * pad_size + x['attention_mask'],  
+        "labels": [-100] * pad_size + x['labels']
+    }
+
+def make_loader(data, tokenizer, batch_size, train=True, shuffle=False):
+
+    data_set = Dataset.from_list(data).map(lambda x: tokenize(tokenizer, x, train=train))
+    data_set = data_set.filter(lambda x: len(x['input_ids']) <= MAX_LEN)
+
+    if train:
+        data_set = data_set.map(lambda x: pad_tokens(tokenizer, x))
+
+    # Uncomment to print original len vs filtered len
+    # print(f'{len(data)}/{len(data_set)} ({len(data_set)/len(data):.3f})')
+        
+    return DataLoader(data_set, collate_fn=default_data_collator, batch_size=batch_size, shuffle=shuffle)
         
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=config['HF_TOKEN'])
-
 if tokenizer.pad_token_id is None:
     tokenizer.pad_token_id = tokenizer.eos_token_id
 
 data = cls_load_tweeteval({})
-train_set = Dataset.from_list(data[0][0]).map(lambda x: tokenize(tokenizer, x))
-val_set = Dataset.from_list(data[0][1]).map(lambda x: tokenize(tokenizer, x))
-test_set = Dataset.from_list(data[0][2]).map(lambda x: tokenize(tokenizer, x, train=False))
 
-train_dataloader = DataLoader(train_set, collate_fn=default_data_collator, batch_size=BATCH_SIZE, shuffle=True)
-val_dataloader = DataLoader(val_set, collate_fn=default_data_collator, batch_size=BATCH_SIZE)
-test_dataloader = DataLoader(test_set, collate_fn=default_data_collator, batch_size=1)
+train_dataloader = make_loader(data[0][0], tokenizer, batch_size=BATCH_SIZE, train=True, shuffle=True)
+val_dataloader = make_loader(data[0][1], tokenizer, batch_size=BATCH_SIZE, train=True, shuffle=False)
+test_dataloader = make_loader(data[0][2], tokenizer, batch_size=1, train=False, shuffle=False)
 
-# validate loaders
+# Uncomment to valid loaders
 # batch_sample = list(iter(train_dataloader))
 # batch_sample = list(iter(val_dataloader))
 # test_sample = list(iter(test_dataloader))
 
 # batch_sample = next(iter(train_dataloader))
+# batch_sample = next(iter(val_dataloader))
 # test_sample = next(iter(test_dataloader))
 
 # print(batch_sample)
+# print(val_dataloader)
 # print(test_sample)
 
 class CLMFineTuner(LightningModule):
@@ -122,9 +140,8 @@ trainer = Trainer(
     log_every_n_steps=1, 
     logger=[tb_logger, csv_logger],
     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
-    accelerator="gpu", devices=8, strategy="deepspeed_stage_3", precision=16
+    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
 )
-
 
 trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 
