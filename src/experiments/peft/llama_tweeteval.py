@@ -19,7 +19,7 @@ BATCH_SIZE = 4
 MODEL_NAME = "meta-llama/Llama-2-7b-hf"
 MAX_LEN = 100
 
-PROMPT = "Below is an instruction that describes a text classification\n\n### Instruction:\nClassify if the following tweet tweet is ironic or not\n\n### Input:\n{input}\n\n### Response:\n"
+PROMPT = "### Instruction:\nClassify if the following tweet tweet is ironic or not\n\n### Input:\n{input}\n\n### Response:\n"
 RESULT_PATH = Path('results/peft_llama')
 
 if not RESULT_PATH.is_dir():
@@ -27,6 +27,7 @@ if not RESULT_PATH.is_dir():
 
 
 peft_config = PromptTuningConfig(
+    prompt_tuning_init="Below is an instruction that describes a text classification\n\n",
     task_type=TaskType.CAUSAL_LM,
     prompt_tuning_init=PromptTuningInit.TEXT,
     num_virtual_tokens=20,
