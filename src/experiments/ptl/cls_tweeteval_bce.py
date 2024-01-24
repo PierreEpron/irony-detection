@@ -135,7 +135,7 @@ val_dataloader = DataLoader(val_set, batch_size=BATCH_SIZE, collate_fn=DataColla
 test_dataloader = DataLoader(test_set, batch_size=1, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id))
 
 model = IronyDetectionFineTuner(
-    'cardiffnlp/twitter-roberta-large-2022-154m', 
+    RESULT_PATH, 
     torch.nn.BCEWithLogitsLoss(),
     MCC_Loss(), 
     learning_rate=LEARNING_RATE
