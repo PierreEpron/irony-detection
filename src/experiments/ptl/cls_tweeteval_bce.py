@@ -20,7 +20,7 @@ from src.training import MCC_Loss
 EPOCHS = 50
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-6
-RESULT_PATH = Path('results/plt_test')
+RESULT_PATH = Path('results/plt_bce')
 
 if not RESULT_PATH.is_dir():
     RESULT_PATH.mkdir()
@@ -89,8 +89,8 @@ class IronyDetectionFineTuner(LightningModule):
     def training_step(self, batch, batch_idx):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
-        loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
-        sec_loss = self.sec_loss_func(outputs['logits'][..., 1].half(), batch['label'].half())
+        loss = self.loss_func(outputs['logits'][..., 1].half(), batch['label'].half())
+        sec_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
 
         self.log("train_loss", loss, batch_size=1, sync_dist=True)
         self.log("sec_train_loss", sec_loss, batch_size=1, sync_dist=True)
@@ -101,8 +101,8 @@ class IronyDetectionFineTuner(LightningModule):
     def validation_step(self, batch, batch_idx):    
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
-        val_loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
-        sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1].half(), batch['label'].half())
+        val_loss = self.loss_func(outputs['logits'][..., 1].half(), batch['label'].half())
+        sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
 
         self.log("val_loss", val_loss, batch_size=1, sync_dist=True)
         self.log("sec_val_loss", sec_val_loss, batch_size=1, sync_dist=True)
@@ -136,13 +136,13 @@ test_dataloader = DataLoader(test_set, batch_size=1, collate_fn=DataCollatorWith
 
 model = IronyDetectionFineTuner(
     'cardiffnlp/twitter-roberta-large-2022-154m', 
-    MCC_Loss(), 
     torch.nn.BCELoss(),
+    MCC_Loss(), 
     learning_rate=LEARNING_RATE
 )
 
-tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="mcc")
-csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="mcc")
+tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="bce")
+csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="bce")
 
 trainer = Trainer(
     default_root_dir=RESULT_PATH,
