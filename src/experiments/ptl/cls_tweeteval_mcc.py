@@ -142,26 +142,26 @@ model = IronyDetectionFineTuner(
     learning_rate=LEARNING_RATE
 )
 
-tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="mcc")
-csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="mcc")
+# tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="mcc")
+# csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="mcc")
 
-trainer = Trainer(
-    default_root_dir=RESULT_PATH,
-    max_epochs=EPOCHS, 
-    log_every_n_steps=1, 
-    logger=[tb_logger, csv_logger],
-    callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
-    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
-)
+# trainer = Trainer(
+#     default_root_dir=RESULT_PATH,
+#     max_epochs=EPOCHS, 
+#     log_every_n_steps=1, 
+#     logger=[tb_logger, csv_logger],
+#     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
+#     accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
+# )
 
-trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
+# trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 
-model.model.save_pretrained(RESULT_PATH)
+# model.model.save_pretrained(RESULT_PATH)
 
 trainer = Trainer(
     default_root_dir=RESULT_PATH,
     accelerator="gpu", devices=1, precision=16
 )
 
-predictions = trainer.predict(model, test_dataloader, ckpt_path='best')
+predictions = trainer.predict(model, test_dataloader)
 write_jsonl(RESULT_PATH / 'predictions.jsonl', predictions)
