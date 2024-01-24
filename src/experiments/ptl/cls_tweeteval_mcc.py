@@ -19,7 +19,7 @@ from src.training import MCC_Loss
 
 EPOCHS = 50
 BATCH_SIZE = 64
-LEARNING_RATE = 1e-6
+LEARNING_RATE = 1e-5
 RESULT_PATH = Path('results/plt_test')
 
 if not RESULT_PATH.is_dir():
@@ -89,7 +89,7 @@ class IronyDetectionFineTuner(LightningModule):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
         loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
-        sec_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'])
+        sec_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
 
         self.log("train_loss", loss, batch_size=1, sync_dist=True)
         self.log("sec_train_loss", sec_loss, batch_size=1, sync_dist=True)
@@ -101,7 +101,7 @@ class IronyDetectionFineTuner(LightningModule):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
         val_loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
-        sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'])
+        sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
 
         self.log("val_loss", val_loss, batch_size=1, sync_dist=True)
         self.log("sec_val_loss", sec_val_loss, batch_size=1, sync_dist=True)
