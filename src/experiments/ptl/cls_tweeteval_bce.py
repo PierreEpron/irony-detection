@@ -74,6 +74,7 @@ class DataCollatorWithPadding:
 class IronyDetectionFineTuner(LightningModule):
     def __init__(self, base_model_name, loss_func, sec_loss_func, learning_rate):
         super().__init__()
+        # self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=1)
         self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=2)
         self.loss_func = loss_func
         self.sec_loss_func = sec_loss_func
