@@ -138,7 +138,7 @@ test_dataloader = DataLoader(test_set, batch_size=1, collate_fn=DataCollatorWith
 model = IronyDetectionFineTuner(
     'cardiffnlp/twitter-roberta-large-2022-154m', 
     MCC_Loss(), 
-    torch.nn.BCELoss(),
+    torch.nn.BCEWithLogitsLoss(),
     learning_rate=LEARNING_RATE
 )
 
