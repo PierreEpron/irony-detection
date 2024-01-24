@@ -89,7 +89,7 @@ class IronyDetectionFineTuner(LightningModule):
     def training_step(self, batch, batch_idx):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
-        loss = self.loss_func(outputs['logits'][..., 1].half(), batch['label'].half())
+        loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
         sec_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
 
         self.log("train_loss", loss, batch_size=1, sync_dist=True)
@@ -101,7 +101,7 @@ class IronyDetectionFineTuner(LightningModule):
     def validation_step(self, batch, batch_idx):    
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
-        val_loss = self.loss_func(outputs['logits'][..., 1].half(), batch['label'].half())
+        val_loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
         sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
 
         self.log("val_loss", val_loss, batch_size=1, sync_dist=True)
@@ -136,7 +136,7 @@ test_dataloader = DataLoader(test_set, batch_size=1, collate_fn=DataCollatorWith
 
 model = IronyDetectionFineTuner(
     'cardiffnlp/twitter-roberta-large-2022-154m', 
-    torch.nn.BCELoss(),
+    torch.nn.BCEWithLogitsLoss(),
     MCC_Loss(), 
     learning_rate=LEARNING_RATE
 )
@@ -150,12 +150,17 @@ trainer = Trainer(
     log_every_n_steps=1, 
     logger=[tb_logger, csv_logger],
     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
-    accelerator="gpu", devices=8, precision=16
+    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
 )
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 
 model.model.save_pretrained(RESULT_PATH)
+
+trainer = Trainer(
+    default_root_dir=RESULT_PATH,
+    accelerator="gpu", devices=8, precision=16
+)
 
 predictions = trainer.predict(model, test_dataloader, ckpt_path='best')
 write_jsonl(RESULT_PATH / 'predictions.jsonl', predictions)
