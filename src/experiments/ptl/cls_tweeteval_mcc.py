@@ -72,11 +72,12 @@ class DataCollatorWithPadding:
         return outputs
 
 class IronyDetectionFineTuner(LightningModule):
-    def __init__(self, base_model_name, loss_func, learning_rate):
+    def __init__(self, base_model_name, loss_func, sec_loss_func, learning_rate):
         super().__init__()
         # self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=1)
         self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=2)
         self.loss_func = loss_func
+        self.loss_func = sec_loss_func
         self.learning_rate = learning_rate
 
     def forward(self, input_ids, attention_mask):
@@ -87,13 +88,26 @@ class IronyDetectionFineTuner(LightningModule):
     
     def training_step(self, batch, batch_idx):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
+
         loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
+        sec_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
+
+        self.log("train_loss", loss, batch_size=1, sync_dist=True)
+        self.log("sec_train_loss", sec_loss, batch_size=1, sync_dist=True)
+        self.log("train_mean_logits", outputs['logits'][..., 1].detach().mean(), batch_size=1, sync_dist=True)
+
         return loss
     
     def validation_step(self, batch, batch_idx):    
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
+
         val_loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
+        sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
+
         self.log("val_loss", val_loss, batch_size=1, sync_dist=True)
+        self.log("sec_val_loss", sec_val_loss, batch_size=1, sync_dist=True)
+        self.log("val_mean_logits", outputs['logits'][..., 1].detach().mean(), batch_size=1, sync_dist=True)
+
 
     def predict_step(self, batch, batch_idx):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
@@ -120,7 +134,12 @@ train_dataloader = DataLoader(train_set, batch_size=BATCH_SIZE, collate_fn=DataC
 val_dataloader = DataLoader(val_set, batch_size=BATCH_SIZE, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id))
 test_dataloader = DataLoader(test_set, batch_size=1, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id))
 
-model = IronyDetectionFineTuner('cardiffnlp/twitter-roberta-large-2022-154m', MCC_Loss(), learning_rate=LEARNING_RATE)
+model = IronyDetectionFineTuner(
+    'cardiffnlp/twitter-roberta-large-2022-154m', 
+    MCC_Loss(), 
+    torch.nn.BCELoss(),
+    learning_rate=LEARNING_RATE
+)
 
 tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="mcc")
 csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="mcc")
