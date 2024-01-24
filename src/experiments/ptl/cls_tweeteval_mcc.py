@@ -160,7 +160,7 @@ model.model.save_pretrained(RESULT_PATH)
 
 trainer = Trainer(
     default_root_dir=RESULT_PATH,
-    accelerator="gpu", devices=8, precision=16
+    accelerator="gpu", devices=1, precision=16
 )
 
 predictions = trainer.predict(model, test_dataloader, ckpt_path='best')
