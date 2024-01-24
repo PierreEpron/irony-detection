@@ -100,9 +100,11 @@ class IronyDetectionFineTuner(LightningModule):
     def validation_step(self, batch, batch_idx):    
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
+        print('outputs:', outputs['logits'][..., 1])
+        print('labels:', batch['label'].float())
+        
         val_loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
         sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
-
         self.log("val_loss", val_loss, batch_size=1, sync_dist=True)
         self.log("sec_val_loss", sec_val_loss, batch_size=1, sync_dist=True)
         self.log("val_mean_logits", outputs['logits'][..., 1].detach().mean(), batch_size=1, sync_dist=True)
