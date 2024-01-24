@@ -90,7 +90,7 @@ class IronyDetectionFineTuner(LightningModule):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
         loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
-        sec_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
+        sec_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'])
 
         self.log("train_loss", loss, batch_size=1, sync_dist=True)
         self.log("sec_train_loss", sec_loss, batch_size=1, sync_dist=True)
@@ -102,7 +102,7 @@ class IronyDetectionFineTuner(LightningModule):
         outputs = self.forward(batch['input_ids'], batch['attention_mask'])
 
         val_loss = self.loss_func(outputs['logits'][..., 1], batch['label'].float())
-        sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'].float())
+        sec_val_loss = self.sec_loss_func(outputs['logits'][..., 1], batch['label'])
 
         self.log("val_loss", val_loss, batch_size=1, sync_dist=True)
         self.log("sec_val_loss", sec_val_loss, batch_size=1, sync_dist=True)
