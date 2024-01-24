@@ -30,7 +30,7 @@ peft_config = PromptTuningConfig(
     task_type=TaskType.CAUSAL_LM,
     prompt_tuning_init=PromptTuningInit.TEXT,
     prompt_tuning_init_text="Below is an instruction that describes a text classification\n\n",
-    num_virtual_tokens=20,
+    num_virtual_tokens=8,
     tokenizer_name_or_path=MODEL_NAME,
 )
 
@@ -142,12 +142,17 @@ trainer = Trainer(
     log_every_n_steps=1, 
     logger=[tb_logger, csv_logger],
     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
-    accelerator="gpu", devices=8, precision=16
+    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
 )
 
 trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 
 finetuner.model.save_pretrained(RESULT_PATH)
+
+trainer = Trainer(
+    default_root_dir=RESULT_PATH,
+    accelerator="gpu", devices=8, precision=16
+)
 
 predictions = trainer.predict(finetuner, test_dataloader, ckpt_path='best')
 write_jsonl(RESULT_PATH / 'predictions.jsonl', predictions)
