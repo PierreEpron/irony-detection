@@ -77,7 +77,7 @@ class IronyDetectionFineTuner(LightningModule):
         # self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=1)
         self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=2)
         self.loss_func = loss_func
-        self.loss_func = sec_loss_func
+        self.sec_loss_func = sec_loss_func
         self.learning_rate = learning_rate
 
     def forward(self, input_ids, attention_mask):
