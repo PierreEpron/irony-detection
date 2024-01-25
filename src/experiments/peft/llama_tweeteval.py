@@ -30,7 +30,7 @@ peft_config = PromptTuningConfig(
     task_type=TaskType.CAUSAL_LM,
     prompt_tuning_init=PromptTuningInit.TEXT,
     prompt_tuning_init_text="Below is an instruction that describes a text classification\n\n",
-    num_virtual_tokens=8,
+    num_virtual_tokens=20,
     tokenizer_name_or_path=MODEL_NAME,
 )
 
