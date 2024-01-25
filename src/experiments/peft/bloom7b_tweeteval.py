@@ -106,7 +106,7 @@ class CLMFineTuner(LightningModule):
         self.learning_rate = learning_rate
 
         self.model = AutoModelForCausalLM.from_pretrained(base_model_name, token=config['HF_TOKEN'])
-        self.model = get_peft_model(self.model, peft_config)
+        # self.model = get_peft_model(self.model, peft_config)
 
     def training_step(self, batch, batch_idx):
         outputs = self.model(**batch)
