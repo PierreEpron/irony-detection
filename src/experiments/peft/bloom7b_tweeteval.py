@@ -153,5 +153,5 @@ trainer = Trainer(
     accelerator="gpu", devices=1, precision=16
 )
 
-predictions = trainer.predict(finetuner, test_dataloader, ckpt_path='best')
+predictions = trainer.predict(finetuner, test_dataloader)
 write_jsonl(RESULT_PATH / 'predictions.jsonl', predictions)
