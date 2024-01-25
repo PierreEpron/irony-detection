@@ -134,20 +134,20 @@ class CLMFineTuner(LightningModule):
 tb_logger = TensorBoardLogger(RESULT_PATH / "tb_logs", name="llama")
 csv_logger = CSVLogger(RESULT_PATH / "cv_logs", name="llama")
 
-finetuner = CLMFineTuner(MODEL_NAME, peft_config, tokenizer.eos_token_id)
+finetuner = CLMFineTuner(RESULT_PATH, peft_config, tokenizer.eos_token_id)
 
-trainer = Trainer(
-    default_root_dir=RESULT_PATH,
-    max_epochs=EPOCHS, 
-    log_every_n_steps=1, 
-    logger=[tb_logger, csv_logger],
-    callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
-    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
-)
+# trainer = Trainer(
+#     default_root_dir=RESULT_PATH,
+#     max_epochs=EPOCHS, 
+#     log_every_n_steps=1, 
+#     logger=[tb_logger, csv_logger],
+#     callbacks=[EarlyStopping(monitor="val_loss", patience=5, mode="min")],
+#     accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
+# )
 
-trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
+# trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 
-finetuner.model.save_pretrained(RESULT_PATH)
+# finetuner.model.save_pretrained(RESULT_PATH)
 
 trainer = Trainer(
     default_root_dir=RESULT_PATH,
