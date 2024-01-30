@@ -9,6 +9,10 @@ from src.peft_ft import make_loader, CLMFineTuner
 from src.model import cls_load_tweeteval
 from src.utils import CustomWriter, MonitoringMetrics, get_plt_loggers, load_config
 
+import torch
+import os
+print(os.environ["CUDA_VISIBLE_DEVICES"])
+print(torch.version.cuda)
 
 config = load_config()
 
