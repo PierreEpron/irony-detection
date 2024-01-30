@@ -60,7 +60,7 @@ monitor.set_time('preprocessing')
 
 
 weight = compute_class_weight('balanced', classes=np.array([0, 1]), y=[item['label'] for item in data[0][1]])
-loss_func = torch.nn.CrossEntropyLoss(weight, reduction='mean')
+loss_func = torch.nn.CrossEntropyLoss(torch.tensor(weight).float(), reduction='mean')
 
 
 model = CLSFineTuner(
