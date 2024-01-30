@@ -106,7 +106,7 @@ class CLMFineTuner(LightningModule):
         self.eos_token_id = eos_token_id
         self.learning_rate = learning_rate
 
-        self.model = AutoModelForCausalLM.from_pretrained(base_model_name, token=hf_token)
+        self.model = AutoModelForCausalLM.from_pretrained(base_model_name, token=hf_token, device_map={'': 0} ) # Try for fix cuda issue
         self.model = get_peft_model(self.model, peft_config)
 
     def training_step(self, batch, batch_idx):
