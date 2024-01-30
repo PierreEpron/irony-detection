@@ -76,9 +76,8 @@ trainer = Trainer(
     max_epochs=EPOCHS, 
     log_every_n_steps=1, 
     logger=get_plt_loggers(RESULT_PATH, MODEL_NAME.split('/')[-1]),
-    callbacks=[EarlyStopping(monitor="val_loss", patience=PATIENCE, mode="min")],
+    callbacks=[EarlyStopping(monitor="val_loss", patience=PATIENCE, mode="min"), pred_writer],
     accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16,
-    callbacks=[pred_writer]
 )
 
 
