@@ -4,7 +4,7 @@ from transformers import AutoTokenizer
 from lightning import Trainer
 from pathlib import Path
 
-from src.peft_ft import peft_loader, CLMFineTuner
+from src.peft_ft import make_loader, CLMFineTuner
 from src.model import cls_load_tweeteval
 from src.utils import get_plt_loggers, load_config
 
@@ -33,15 +33,15 @@ if tokenizer.pad_token_id is None:
 
 data = cls_load_tweeteval({})
 
-train_dataloader = peft_loader(
+train_dataloader = make_loader(
     data[0][0], tokenizer, prompt_template=PROMPT_TEMPLATE, batch_size=BATCH_SIZE,
     max_len=MAX_LEN, train=True, shuffle=True)
 
-val_dataloader = peft_loader(
+val_dataloader = make_loader(
     data[0][1], tokenizer, prompt_template=PROMPT_TEMPLATE, batch_size=BATCH_SIZE,
     max_len=MAX_LEN, train=True, shuffle=False)
 
-test_dataloader = peft_loader(
+test_dataloader = make_loader(
     data[0][2], tokenizer, prompt_template=PROMPT_TEMPLATE, batch_size=1, 
     max_len=MAX_LEN, train=False, shuffle=False)
 

@@ -10,7 +10,7 @@ import torch
 IDX_2_LABEL = {0:"no ironic", 1:"ironic"}
 
 
-def peft_tokenize(tokenizer, example, template, idx2label=IDX_2_LABEL, train=True):
+def tokenize_example(tokenizer, example, template, idx2label=IDX_2_LABEL, train=True):
     ''' 
         Tokenize the given example using the given "template".
         Used for all the peft experiments.
@@ -60,7 +60,7 @@ def peft_tokenize(tokenizer, example, template, idx2label=IDX_2_LABEL, train=Tru
         }
 
 
-def peft_pad(tokenizer, example, max_len=100):
+def pad_example(tokenizer, example, max_len=100):
     '''
         Pad from the left the given tokenized "example".
         Padded to "max_len".
@@ -73,7 +73,7 @@ def peft_pad(tokenizer, example, max_len=100):
     }
 
 
-def peft_loader(
+def make_loader(
         data, 
         tokenizer, 
         prompt_template, 
@@ -86,11 +86,11 @@ def peft_loader(
     '''
         Create dataset, tokenize examples, filter example by max_len, pad examples then return a loader.
     '''
-    data_set = Dataset.from_list(data).map(lambda x: peft_tokenize(tokenizer, x, prompt_template, idx2label=idx2label, train=train))
+    data_set = Dataset.from_list(data).map(lambda x: tokenize_example(tokenizer, x, prompt_template, idx2label=idx2label, train=train))
     data_set = data_set.filter(lambda x: len(x['input_ids']) <= max_len)
 
     if train:
-        data_set = data_set.map(lambda x: peft_pad(tokenizer, x))
+        data_set = data_set.map(lambda x: pad_example(tokenizer, x))
 
     return DataLoader(data_set, collate_fn=default_data_collator, batch_size=batch_size, shuffle=shuffle)
 
