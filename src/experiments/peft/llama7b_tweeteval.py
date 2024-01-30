@@ -8,22 +8,28 @@ from src.peft_ft import peft_loader, CLMFineTuner
 from src.model import cls_load_tweeteval
 from src.utils import get_plt_loggers, load_config
 
+
 config = load_config()
+
 
 EPOCHS = 50
 BATCH_SIZE = 4
-MODEL_NAME = "bigscience/bloom-7b1"
+MODEL_NAME = "meta-llama/Llama-2-7b-hf"
 MAX_LEN = 100
 PATIENCE = 5
 
-PROMPT_TEMPLATE = Path('src/prompts/bloom_prompt.txt').read_text()
-RESULT_PATH = Path('results/peft_bloom7b')
+
+PROMPT_TEMPLATE = Path('src/prompts/llama_prompt.txt').read_text()
+RESULT_PATH = Path('results/peft_llama7b')
+
 
 peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
-        
+
+
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=config['HF_TOKEN'])
 if tokenizer.pad_token_id is None:
     tokenizer.pad_token_id = tokenizer.eos_token_id
+
 
 data = cls_load_tweeteval({})
 
@@ -38,6 +44,7 @@ val_dataloader = peft_loader(
 test_dataloader = peft_loader(
     data[0][2], tokenizer, prompt_template=PROMPT_TEMPLATE, batch_size=1, 
     max_len=MAX_LEN, train=False, shuffle=False)
+
 
 # Uncomment to valid loaders
 # train_sample = list(iter(train_dataloader))
