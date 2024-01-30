@@ -22,7 +22,7 @@ class MonitoringMetrics:
     def set_time(self, key):
         ''' Use to record time elapsed since last set_time. Record it the given key'''
         t = time.time()
-        self.records['times'][key] = self.t - t
+        self.records['times'][key] = t - self.t
         self.t = t 
 
     def set_size(self, key, value):
