@@ -15,7 +15,7 @@ config = load_config()
 EPOCHS = 50
 BATCH_SIZE = 4
 MODEL_NAME = "bigscience/bloom-7b1"
-MAX_LEN = 100
+MAX_LEN = 125
 PATIENCE = 5
 
 
