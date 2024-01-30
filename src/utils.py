@@ -67,5 +67,9 @@ def load_config(path='.env'):
     }
 
 
-def find_closest(num, collection): # from https://stackoverflow.com/a/12141215
-   return min(collection, key=lambda x:abs(x-num))
+def find_closest(num, collection):
+    ''' 
+        Find closest integer from a list of integer
+        from https://stackoverflow.com/a/12141215
+    '''
+    return min(collection, key=lambda x:abs(x-num))
