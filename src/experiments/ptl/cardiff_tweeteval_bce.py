@@ -8,7 +8,7 @@ import torch
 
 from src.cls_ft import  make_loader, CLSFineTuner
 from src.model import cls_load_tweeteval
-from utils import CustomWriter, get_plt_loggers
+from utils import CustomWriter, MonitoringMetrics, get_plt_loggers
 
 
 EPOCHS = 50
@@ -20,6 +20,9 @@ MODEL_NAME = "cardiffnlp/twitter-roberta-large-2022-154m"
 RESULT_PATH = Path('results/cardiff_tweeteval_bce')
 
 
+monitor = MonitoringMetrics()
+
+
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
 
@@ -27,10 +30,16 @@ data = cls_load_tweeteval({})
 
 
 train_dataloader = make_loader(data[0][0], tokenizer, BATCH_SIZE, shuffle=True)
-
 val_dataloader = make_loader(data[0][1], tokenizer, BATCH_SIZE, shuffle=False)
-
 test_dataloader = make_loader(data[0][2], tokenizer, 1, shuffle=False)
+
+
+monitor.set_size('train', len(train_dataloader.dataset))
+monitor.set_size('val', len(val_dataloader.dataset))
+monitor.set_size('test', len(test_dataloader.dataset))
+
+
+monitor.set_time('preprocessing')
 
 
 # Uncomment to valid loaders
@@ -75,4 +84,11 @@ trainer = Trainer(
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 model.model.save_pretrained(RESULT_PATH)
+
+monitor.set_time('training')
+
 trainer.predict(model, test_dataloader, return_predictions=False)
+
+monitor.set_time('predicting')
+
+monitor.save(RESULT_PATH / 'monitoring.json')

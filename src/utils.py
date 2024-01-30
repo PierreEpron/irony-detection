@@ -3,9 +3,36 @@ from lightning.pytorch.callbacks import BasePredictionWriter
 from dotenv import dotenv_values
 from pathlib import Path
 import torch
+import time
 import json
 import os
 
+
+class MonitoringMetrics:
+    '''
+        Utility class to record and save Monitoring metrics.
+    '''
+    def __init__(self) -> None:       
+        self.t = time.time()
+        self.records = {
+            'times': {},
+            'sizes': {}
+        }
+
+    def set_time(self, key):
+        ''' Use to record time elapsed since last set_time. Record it the given key'''
+        t = time.time()
+        self.records['times'][key] = self.t - t
+        self.t = t 
+
+    def set_size(self, key, value):
+        ''' Use to record size. Record it the given key'''
+        self.records['sizes'][key] = value
+        
+    def save(self, result_path):
+        ''' use to save recors in json file'''
+        result_path = Path(result_path) if isinstance(result_path, str) else result_path
+        result_path.write_text(json.dumps(self.records))
 
 def get_plt_loggers(result_path, name):
     '''

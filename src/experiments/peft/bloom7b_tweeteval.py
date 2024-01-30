@@ -6,7 +6,7 @@ from pathlib import Path
 
 from src.peft_ft import make_loader, CLMFineTuner
 from src.model import cls_load_tweeteval
-from src.utils import CustomWriter, get_plt_loggers, load_config
+from src.utils import CustomWriter, MonitoringMetrics, get_plt_loggers, load_config
 
 
 config = load_config()
@@ -24,7 +24,8 @@ RESULT_PATH = Path('results/bloom7b_tweeteval')
 
 
 peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
-        
+
+monitor = MonitoringMetrics()
         
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=config['HF_TOKEN'])
 if tokenizer.pad_token_id is None:
@@ -45,6 +46,14 @@ val_dataloader = make_loader(
 test_dataloader = make_loader(
     data[0][2], tokenizer, prompt_template=PROMPT_TEMPLATE, batch_size=1, 
     max_len=MAX_LEN, train=False, shuffle=False)
+
+
+monitor.set_size('train', len(train_dataloader.dataset))
+monitor.set_size('val', len(val_dataloader.dataset))
+monitor.set_size('test', len(test_dataloader.dataset))
+
+
+monitor.set_time('preprocessing')
 
 
 # Uncomment to valid loaders
@@ -82,4 +91,12 @@ trainer = Trainer(
 
 trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 finetuner.model.save_pretrained(RESULT_PATH)
+
+monitor.set_time('training')
+
 trainer.predict(finetuner, test_dataloader, return_predictions=False)
+
+monitor.set_time('predicting')
+
+monitor.save(RESULT_PATH / 'monitoring.json')
+
