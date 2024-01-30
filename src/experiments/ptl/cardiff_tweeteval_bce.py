@@ -29,9 +29,9 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 data = cls_load_tweeteval({})
 
 
-train_dataloader = make_loader(data[0][0], tokenizer, BATCH_SIZE, shuffle=True)
-val_dataloader = make_loader(data[0][1], tokenizer, BATCH_SIZE, shuffle=False)
-test_dataloader = make_loader(data[0][2], tokenizer, 1, shuffle=False)
+train_dataloader = make_loader(data[0][0], tokenizer, BATCH_SIZE, MAX_LEN, shuffle=True)
+val_dataloader = make_loader(data[0][1], tokenizer, BATCH_SIZE, MAX_LEN, shuffle=False)
+test_dataloader = make_loader(data[0][2], tokenizer, 1, MAX_LEN, shuffle=False)
 
 
 monitor.set_size('train', len(train_dataloader.dataset))
