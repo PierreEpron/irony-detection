@@ -1,0 +1,3 @@
+Tweet text A: {parent_text} 
+Tweet text B: {text}
+Label : 

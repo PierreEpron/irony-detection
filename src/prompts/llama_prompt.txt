@@ -1,5 +1,0 @@
-### Instruction:
-Classify if the following tweet tweet is ironic or not
-### Input:
-{text}
-### Response:

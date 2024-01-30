@@ -1,0 +1,6 @@
+### Instruction:
+Below is a tweet exchange between person A and person B. Classify whether tweet B is ironic or not. 
+### Input:
+A: {parent_text}
+B: {text}
+### Response:
