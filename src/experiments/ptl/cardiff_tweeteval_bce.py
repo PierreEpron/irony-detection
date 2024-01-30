@@ -8,7 +8,7 @@ import torch
 
 from src.cls_ft import  make_loader, CLSFineTuner
 from src.model import cls_load_tweeteval
-from utils import CustomWriter, MonitoringMetrics, get_plt_loggers
+from src.utils import CustomWriter, MonitoringMetrics, get_plt_loggers
 
 
 EPOCHS = 50

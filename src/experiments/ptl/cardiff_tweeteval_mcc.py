@@ -5,7 +5,7 @@ from pathlib import Path
 
 from src.cls_ft import compute_mcc_loss, make_loader, CLSFineTuner
 from src.model import cls_load_tweeteval
-from utils import CustomWriter, get_plt_loggers, MonitoringMetrics
+from src.utils import CustomWriter, get_plt_loggers, MonitoringMetrics
 
 
 EPOCHS = 50
