@@ -72,14 +72,14 @@ trainer = Trainer(
 )
 
 
-tuner = Tuner(trainer)
-lr_finder = tuner.lr_find(model)
-new_lr = lr_finder.suggestion()
+# tuner = Tuner(trainer)
+# lr_finder = tuner.lr_find(model)
+# new_lr = lr_finder.suggestion()
 
-monitor.set_size('lr_results', lr_finder.results)
-monitor.set_size('lr_suggestion', new_lr)
+# monitor.set_size('lr_results', lr_finder.results)
+# monitor.set_size('lr_suggestion', new_lr)
 
-model.hparams.lr = new_lr
+# model.hparams.lr = new_lr
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 model.model.save_pretrained(RESULT_PATH)

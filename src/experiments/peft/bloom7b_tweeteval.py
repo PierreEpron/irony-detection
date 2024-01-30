@@ -88,14 +88,14 @@ trainer = Trainer(
     accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16,
 )
 
-tuner = Tuner(trainer)
-lr_finder = tuner.lr_find(finetuner)
-new_lr = lr_finder.suggestion()
+# tuner = Tuner(trainer)
+# lr_finder = tuner.lr_find(finetuner)
+# new_lr = lr_finder.suggestion()
 
-monitor.set_size('lr_results', lr_finder.results)
-monitor.set_size('lr_suggestion', new_lr)
+# monitor.set_size('lr_results', lr_finder.results)
+# monitor.set_size('lr_suggestion', new_lr)
 
-finetuner.hparams.lr = new_lr
+# finetuner.hparams.lr = new_lr
 
 trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 finetuner.model.save_pretrained(RESULT_PATH)
