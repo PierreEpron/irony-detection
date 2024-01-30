@@ -110,7 +110,7 @@ class CLSFineTuner(LightningModule):
 def compute_mcc_loss(x, y):
     ''' Compute mcc loss on each logits and average them '''
     mcc = MCCLoss()
-    return (mcc(x[..., 0], y) + mcc(x[..., 1], y)) / 2
+    return (mcc(x[..., 0], 1 - y) + mcc(x[..., 1], y)) / 2
 
 
 class MCCLoss(torch.nn.Module):
