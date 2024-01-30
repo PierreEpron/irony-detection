@@ -41,12 +41,8 @@ def make_line(values:pd.DataFrame, equality, cleaning, emojis, new_labels):
         # label = 1 if pd.Series(labels).idxmax()=='iro' else 0 #set the label to 1 if text is irony and 0 otherwise
         label = new_labels[find_closest(labels.get('iro', 0)/(labels.get('iro', 0)+labels.get('not', 0)), list(new_labels.keys()))]
 
-    if emojis=='rem':
-        line[3] = demoji.replace(line[3], '')
-        line[5] = demoji.replace(line[5], '')
-    elif emojis!='keep':
-        line[3] = demoji.replace_with_desc(line[3], emojis)
-        line[5] = demoji.replace_with_desc(line[5], emojis)
+    line[3] = clean_emojis(line[3], emojis)
+    line[5] = clean_emojis(line[5], emojis)
 
     for pattern in cleaning:
         line[3] = re.sub(REG_EXPRS[pattern][0], REG_EXPRS[pattern][1], line[3])
@@ -127,13 +123,36 @@ def iter_splits(splits_path, df):
 def clean_brackets(text):
     return text.replace('{', '(').replace('}', ')')
 
+def clean_emojis(text, type:str = ''):
+    """
+    Clean emojis based on the action chosen. By default replaces them with their description.
+
+    Parameters
+    ----------
+    text : the text to be cleaned
+    type : the action to be taken. Either 'rem' to remove the emojis, 'keep' to keep them
+    or any string (default is empty string) to replace the emojis with their description
+    using the string as a separator between the description of the emoji and the rest of
+    the text
+
+    Returns
+    ---------
+    text : cleaned text
+    """
+    if type=='rem':
+        return demoji.replace(text, '')
+    elif type!='keep':
+        return demoji.replace_with_desc(text, type)
+    else:
+        return text
+
 def clean_hashtags(text, hashtags=['#irony', '#sarcasm','#not']):
     for hashtag in hashtags:
         text = re.sub(hashtag, '', text, flags=re.I)
     return re.sub(r' +', r' ', text)
 
 def clean_text(text):
-    return clean_hashtags(clean_brackets(text)).strip()
+    return clean_emojis(clean_hashtags(clean_brackets(text))).strip()
 
 def load_tweeteval_set(name, path):
     X = (path / f'{name}_text.txt').read_text(encoding='utf-8').strip().split('\n')
