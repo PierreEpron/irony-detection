@@ -20,7 +20,7 @@ PATIENCE = 5
 
 
 PROMPT_TEMPLATE = Path('src/prompts/bloom_prompt.txt').read_text()
-RESULT_PATH = Path('results/peft_bloom7b')
+RESULT_PATH = Path('results/bloom7b_tweeteval')
 
 
 peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
@@ -80,4 +80,4 @@ trainer = Trainer(
 
 trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 finetuner.model.save_pretrained(RESULT_PATH)
-predictions = trainer.predict(finetuner, test_dataloader)
+trainer.predict(finetuner, test_dataloader)
