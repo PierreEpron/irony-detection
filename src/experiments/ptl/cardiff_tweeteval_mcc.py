@@ -12,6 +12,7 @@ EPOCHS = 50
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-5
 PATIENCE = 5
+MAX_LEN = 125
 MODEL_NAME = "cardiffnlp/twitter-roberta-large-2022-154m"
 RESULT_PATH = Path('results/cardiff_tweeteval_mcc')
 
@@ -22,11 +23,11 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 data = cls_load_tweeteval({})
 
 
-train_dataloader = make_loader(data[0][0], tokenizer, BATCH_SIZE, shuffle=True)
+train_dataloader = make_loader(data[0][0], tokenizer, BATCH_SIZE, MAX_LEN, shuffle=True)
 
-val_dataloader = make_loader(data[0][1], tokenizer, BATCH_SIZE, shuffle=False)
+val_dataloader = make_loader(data[0][1], tokenizer, BATCH_SIZE, MAX_LEN, shuffle=False)
 
-test_dataloader = make_loader(data[0][2], tokenizer, 1, shuffle=False)
+test_dataloader = make_loader(data[0][2], tokenizer, 1, MAX_LEN, shuffle=False)
 
 
 # Uncomment to valid loaders

@@ -54,11 +54,12 @@ class DataCollatorWithPadding:
         return outputs
 
 
-def make_loader(data, tokenizer, batch_size, shuffle=True):
+def make_loader(data, tokenizer, batch_size, max_len, shuffle=True):
     '''
         Create dataset, tokenize examples, filter example by max_len, pad examples then return a loader.
     '''
     data_set = Dataset.from_list(data).map(lambda x: tokenizer(x['text']))
+    data_set = data_set.filter(lambda x: len(x['input_ids']) <= max_len)
     return DataLoader(data_set, batch_size=batch_size, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id), shuffle=shuffle)
 
 
