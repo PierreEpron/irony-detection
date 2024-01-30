@@ -24,7 +24,7 @@ PROMPT_TEMPLATE = Path('src/prompts/bloom_single_prompt.txt').read_text()
 RESULT_PATH = Path('results/bloom7b_tweeteval')
 
 
-peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
+peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, r=64, lora_alpha=128, lora_dropout=0.1)
 
 monitor = MonitoringMetrics()
         
