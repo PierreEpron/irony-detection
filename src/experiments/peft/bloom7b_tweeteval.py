@@ -12,9 +12,6 @@ from src.utils import CustomWriter, MonitoringMetrics, get_plt_loggers, load_con
 import torch
 import os
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = '8'
-
-print(torch.version.cuda)
 
 config = load_config()
 
