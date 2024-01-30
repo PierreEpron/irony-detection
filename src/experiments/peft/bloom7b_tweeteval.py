@@ -19,7 +19,7 @@ MAX_LEN = 125
 PATIENCE = 5
 
 
-PROMPT_TEMPLATE = Path('src/prompts/bloom_prompt.txt').read_text()
+PROMPT_TEMPLATE = Path('src/prompts/bloom_single_prompt.txt').read_text()
 RESULT_PATH = Path('results/bloom7b_tweeteval')
 
 

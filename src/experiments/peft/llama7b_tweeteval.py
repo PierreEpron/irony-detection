@@ -19,7 +19,7 @@ MAX_LEN = 125
 PATIENCE = 5
 
 
-PROMPT_TEMPLATE = Path('src/prompts/llama_prompt.txt').read_text()
+PROMPT_TEMPLATE = Path('src/prompts/llama_single_prompt.txt').read_text()
 RESULT_PATH = Path('results/llama7b_tweeteval')
 
 peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
