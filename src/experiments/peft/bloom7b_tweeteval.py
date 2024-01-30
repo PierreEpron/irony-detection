@@ -6,7 +6,7 @@ from pathlib import Path
 
 from src.peft_ft import make_loader, CLMFineTuner
 from src.model import cls_load_tweeteval
-from src.utils import get_plt_loggers, load_config
+from src.utils import CustomWriter, get_plt_loggers, load_config
 
 
 config = load_config()
@@ -66,6 +66,7 @@ test_dataloader = make_loader(
 
 
 finetuner = CLMFineTuner(MODEL_NAME, peft_config, tokenizer.eos_token_id)
+pred_writer = CustomWriter(output_dir=RESULT_PATH, write_interval="epoch")
 
 
 trainer = Trainer(
@@ -74,10 +75,11 @@ trainer = Trainer(
     log_every_n_steps=1, 
     logger=get_plt_loggers(RESULT_PATH, MODEL_NAME.split('/')[-1]),
     callbacks=[EarlyStopping(monitor="val_loss", patience=PATIENCE, mode="min")],
-    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
+    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16,
+    callbacks=[pred_writer]
 )
 
 
 trainer.fit(model=finetuner, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 finetuner.model.save_pretrained(RESULT_PATH)
-trainer.predict(finetuner, test_dataloader)
+trainer.predict(finetuner, test_dataloader, return_predictions=False)

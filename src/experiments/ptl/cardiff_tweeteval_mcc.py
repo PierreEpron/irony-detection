@@ -5,7 +5,7 @@ from pathlib import Path
 
 from src.cls_ft import compute_mcc_loss, make_loader, CLSFineTuner
 from src.model import cls_load_tweeteval
-from utils import get_plt_loggers
+from utils import CustomWriter, get_plt_loggers
 
 
 EPOCHS = 50
@@ -51,6 +51,7 @@ model = CLSFineTuner(
     compute_mcc_loss, 
     learning_rate=LEARNING_RATE
 )
+pred_writer = CustomWriter(output_dir=RESULT_PATH, write_interval="epoch")
 
 
 trainer = Trainer(
@@ -59,10 +60,11 @@ trainer = Trainer(
     log_every_n_steps=1, 
     logger=get_plt_loggers(RESULT_PATH, MODEL_NAME.split('/')[-1]),
     callbacks=[EarlyStopping(monitor="val_loss", patience=PATIENCE, mode="min")],
-    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16
+    accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16,
+    callbacks=[pred_writer]
 )
 
 
 trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
 model.model.save_pretrained(RESULT_PATH)
-trainer.predict(model, test_dataloader)
+trainer.predict(model, test_dataloader, return_predictions=False)
