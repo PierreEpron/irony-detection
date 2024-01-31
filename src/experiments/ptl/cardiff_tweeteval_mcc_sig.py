@@ -4,7 +4,7 @@ from transformers import AutoTokenizer
 from lightning import Trainer
 from pathlib import Path
 
-from src.cls_ft import compute_2d_mcc_loss, make_loader, CLSFineTuner
+from src.cls_ft import compute_mcc_loss, make_loader, CLSFineTuner
 from src.model import cls_load_tweeteval
 from src.utils import CustomWriter, get_plt_loggers, MonitoringMetrics
 
@@ -56,7 +56,7 @@ monitor.set_time('preprocessing')
 
 model = CLSFineTuner(
     MODEL_NAME, 
-    compute_2d_mcc_loss, 
+    compute_mcc_loss, 
     learning_rate=LEARNING_RATE
 )
 pred_writer = CustomWriter(output_dir=RESULT_PATH, write_interval="epoch")

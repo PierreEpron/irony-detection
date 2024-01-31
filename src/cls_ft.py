@@ -63,6 +63,49 @@ def make_loader(data, tokenizer, batch_size, max_len, shuffle=True):
     return DataLoader(data_set, batch_size=batch_size, collate_fn=DataCollatorWithPadding(tokenizer.pad_token_id), shuffle=shuffle)
 
 
+class CLSSigmoidFineTuner(LightningModule):
+    '''
+        Finetuner for cls task
+    '''
+    def __init__(self, base_model_name, loss_func, learning_rate):
+        super().__init__()
+        self.model = AutoModelForSequenceClassification.from_pretrained(base_model_name, output_attentions=True, num_labels=1)
+        self.loss_func = loss_func
+        self.learning_rate = learning_rate
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
+        outputs['logits'] = torch.sigmoid(outputs["logits"])
+        return outputs
+    
+    def training_step(self, batch, batch_idx):
+        outputs = self.forward(batch['input_ids'], batch['attention_mask'])
+
+        loss = self.loss_func(outputs['logits'], batch['label'].long())
+        self.log("train_loss", loss, batch_size=1, on_step=False, on_epoch=True, sync_dist=True)
+
+        return loss
+    
+    def validation_step(self, batch, batch_idx):    
+        outputs = self.forward(batch['input_ids'], batch['attention_mask'])
+
+        val_loss = self.loss_func(outputs['logits'], batch['label'].long())
+        self.log("val_loss", val_loss, batch_size=1, on_step=False, on_epoch=True, sync_dist=True)
+
+    def predict_step(self, batch, batch_idx):
+        outputs = self.forward(batch['input_ids'], batch['attention_mask'])
+        return {
+            'id_original':batch['id_original'][0], 
+            'text':batch['text'][0], 
+            'gold':batch['label'].item(), 
+            'pred':(outputs['logits'] > .5).int().item(), 
+            'score':outputs['logits'].tolist()[0]
+        }
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return optimizer
+
 class CLSFineTuner(LightningModule):
     '''
         Finetuner for cls task
@@ -107,11 +150,16 @@ class CLSFineTuner(LightningModule):
         return optimizer
 
 
-def compute_mcc_loss(x, y):
+def compute_2d_mcc_loss(x, y):
     ''' Compute mcc loss on each logits and average them '''
     mcc = MCCLoss()
     return (mcc(x[..., 0], 1 - y.float()) + mcc(x[..., 1], y.float())) / 2
     # return mcc(x[..., 1], y)
+
+def compute_1d_mcc_loss(x, y):
+    ''' Compute mcc loss on each logits and average them '''
+    mcc = MCCLoss()
+    return mcc(x, y)
 
 
 class MCCLoss(torch.nn.Module):
