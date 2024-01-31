@@ -4,7 +4,7 @@ from transformers import AutoTokenizer
 from lightning import Trainer
 from pathlib import Path
 
-from src.cls_ft import compute_1d_mcc_loss, make_loader, CLSFineTuner
+from src.cls_ft import compute_1d_mcc_loss, make_loader, CLSSigmoidFineTuner
 from src.model import cls_load_tweeteval
 from src.utils import CustomWriter, get_plt_loggers, MonitoringMetrics
 
@@ -54,7 +54,7 @@ monitor.set_time('preprocessing')
 # print(tokenizer.decode(test_sample[0]['input_ids'][0]))
 
 
-model = CLSFineTuner(
+model = CLSSigmoidFineTuner(
     MODEL_NAME, 
     compute_1d_mcc_loss, 
     learning_rate=LEARNING_RATE
