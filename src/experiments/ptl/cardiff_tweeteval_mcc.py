@@ -64,5 +64,6 @@ def run(k):
     monitor.save(result_path / 'monitoring.json')
 
 if __name__ == '__main__':
-    for k in range(5):
-        run(k)
+    import sys
+    k = sys.argv[1]
+    run(k)
