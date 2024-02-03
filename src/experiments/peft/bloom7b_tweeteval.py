@@ -106,7 +106,7 @@ finetuner.model.save_pretrained(RESULT_PATH)
 
 monitor.set_time('training')
 
-trainer.predict(finetuner, test_dataloader, return_predictions=False)
+trainer.predict(finetuner, test_dataloader, return_predictions=False, ckpt_path='best')
 
 monitor.set_time('predicting')
 

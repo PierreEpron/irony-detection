@@ -64,7 +64,7 @@ def run(k):
 
     monitor.set_time('training')
 
-    trainer.predict(model, test_dataloader, return_predictions=False)
+    trainer.predict(model, test_dataloader, return_predictions=False, ckpt_path='best')
 
     monitor.set_time('predicting')
 
