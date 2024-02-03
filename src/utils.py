@@ -42,9 +42,9 @@ def get_plt_loggers(result_path, name):
     if not result_path.is_dir():
         result_path.mkdir()
 
-    tb_logger = TensorBoardLogger(result_path / "tb_logs", name=name)
+    # tb_logger = TensorBoardLogger(result_path / "tb_logs", name=name)
     csv_logger = CSVLogger(result_path / "cv_logs", name=name)
-    return [tb_logger, csv_logger]
+    return [csv_logger]
 
 
 class CustomWriter(BasePredictionWriter):
