@@ -15,7 +15,7 @@ config = load_config()
 EPOCHS = 50
 BATCH_SIZE = 4
 MODEL_NAME = "meta-llama/Llama-2-7b-hf"
-MAX_LEN = 125
+MAX_LEN = 100
 PATIENCE = 5
 
 
