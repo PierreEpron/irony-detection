@@ -18,6 +18,9 @@ MODEL_NAME = "cardiffnlp/twitter-roberta-large-2022-154m"
 
 RESULT_PATH = Path('results/cardiff_tweeteval_mcc')
 
+if not RESULT_PATH.is_dir():
+    RESULT_PATH.mkdir()
+
 def run(k):
 
     result_path =  RESULT_PATH / str(k)
