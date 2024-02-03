@@ -29,9 +29,9 @@ def run(k):
 
 
     data = list(cls_load_epic(config))
-    train_dataloader = make_loader(data[k][0], tokenizer, BATCH_SIZE, MAX_LEN, shuffle=True)
-    val_dataloader = make_loader(data[k][1], tokenizer, BATCH_SIZE, MAX_LEN, shuffle=False)
-    test_dataloader = make_loader(data[k][2], tokenizer, 1, MAX_LEN, shuffle=False)
+    train_dataloader = make_loader(data[int(k)][0], tokenizer, BATCH_SIZE, MAX_LEN, shuffle=True)
+    val_dataloader = make_loader(data[int(k)][1], tokenizer, BATCH_SIZE, MAX_LEN, shuffle=False)
+    test_dataloader = make_loader(data[int(k)][2], tokenizer, 1, MAX_LEN, shuffle=False)
 
 
     monitor.set_size('train', len(train_dataloader.dataset))
@@ -70,7 +70,7 @@ def run(k):
 
     monitor.save(result_path / 'monitoring.json')
 
-    
+
 if __name__ == '__main__':
     import sys
     k = sys.argv[1]
