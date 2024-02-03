@@ -90,7 +90,7 @@ def make_loader(
     data_set = data_set.filter(lambda x: len(x['input_ids']) <= max_len)
 
     if train:
-        data_set = data_set.map(lambda x: pad_example(tokenizer, x))
+        data_set = data_set.map(lambda x: pad_example(tokenizer, x, max_len))
 
     return DataLoader(data_set, collate_fn=default_data_collator, batch_size=batch_size, shuffle=shuffle)
 

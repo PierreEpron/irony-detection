@@ -17,7 +17,7 @@ config = load_config()
 print(torch.cuda.device_count())
 
 EPOCHS = 50
-BATCH_SIZE = 4
+BATCH_SIZE = 8
 MODEL_NAME = "bigscience/bloom-7b1"
 MAX_LEN = 125
 PATIENCE = 5
@@ -77,7 +77,7 @@ monitor.set_time('preprocessing')
 # print(tokenizer.decode(test_sample[0]['input_ids'][0]))
 # print(tokenizer.decode(test_sample[0]['labels'][0]))
 
-torch.cuda.empty_cache() 
+# torch.cuda.empty_cache() 
 
 finetuner = CLMFineTuner(MODEL_NAME, config['HF_TOKEN'], peft_config, tokenizer.eos_token_id)
 pred_writer = CustomWriter(output_dir=RESULT_PATH, write_interval="epoch")
