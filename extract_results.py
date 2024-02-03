@@ -14,7 +14,7 @@ results_path = repo_path / 'results' / prefix
 
 for k in range(5):
     k_path = results_path / str(k)
-    log_path = list(k_path.glob('cv_logs/*/version_*/metrics.csv'))
+    log_path = list(k_path.glob('cv_logs/*/version_1/metrics.csv'))
     assert len(log_path) == 1, f"Multiple or no version found for log_path: {log_path}"
     log_path = log_path[0]
 
@@ -24,7 +24,7 @@ for k in range(5):
     
     write_jsonl(home_path / f'{prefix}_predictions_{k}.jsonl', predictions)
     shutil.copyfile(k_path / 'monitoring.json', home_path / f'{prefix}_monitoring_{k}.json')
-    shutil.copyfile(log_path, home_path / f'{prefix}_logs_{k}.json')
+    shutil.copyfile(log_path, home_path / f'{prefix}_logs_{k}.csv')
 
 # for path in results_path.glob(f'{prefix}*'):
 #     if path.is_dir():
