@@ -76,7 +76,7 @@ def run(k):
 
     monitor.save(result_path / 'monitoring.json')
 
-    if __name__ == '__main__':
-        import sys
-        k = sys.argv[1]
-        run(k)
+if __name__ == '__main__':
+    import sys
+    k = sys.argv[1]
+    run(k)
