@@ -14,7 +14,7 @@ import os
 
 
 config = load_config()
-
+print(torch.cuda.device_count())
 
 EPOCHS = 50
 BATCH_SIZE = 4
