@@ -3,10 +3,10 @@ from pathlib import Path
 from tqdm import tqdm
 import time
 
-from src.model import clm_load_epic, load_clm_model
+from src.model import load_clm_model
+from src.prompt import generate_gen_turns, load_phrases
 from src.utils import load_config, read_jsonl, write_jsonl
-
-N = 10
+from src.preprocessing import load_tweeteval
 
 def generate(model, inputs):
     return model.generate(
@@ -20,9 +20,11 @@ def generate(model, inputs):
         repetition_penalty=1.2,
     )
 
+
 config = load_config()
 config = config | {
-    'RESULT_PATH':"results/epic_rate{n}_open_zs.jsonl".format(n=N),
+    'RESULT_PATH':"results/tweeteval_open_zs.jsonl",
+    'CLM_PHRASES_PATH':"src/prompts/gen_single_phrases.json"
 }
 
 tokenizer = AutoTokenizer.from_pretrained(config['CLM_MODEL_NAME'], token=config['HF_TOKEN'])
@@ -32,7 +34,8 @@ tokenizer.use_default_system_prompt = False
 model = load_clm_model(config['CLM_MODEL_NAME'], method=config['LOAD_MODEL_METHOD'], token=config['HF_TOKEN'])
 model.eval()
 
-data = clm_load_epic(config)
+_, _, data = load_tweeteval()
+phrases, _ = load_phrases(config['CLM_PHRASES_PATH'])
 
 # item = data[0]
 results = []
@@ -47,16 +50,14 @@ for item in tqdm(data, "Generation loop:"):
 
     start_time = time.time()
 
-    turns = [
-        {"role":"user", "content":"Do you think the User2 in the following discussion is ironic?\n\nUser1: {parent_text}\nUser2: {text}".format(**item)}
-    ]
+    turns, seed_phs, subs = generate_gen_turns(item, phrases)
 
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
     outputs = generate(model, inputs)
 
     turns.extend([
         {"role": "assistant", "content":tokenizer.decode(outputs[0][inputs.shape[-1]:], skip_special_tokens=True)},
-        {"role": "user", "content":"From 1 to {n}, how ironic do you think the previous User2 is ? Format your answer like x/{n}.".format(n=N)},
+        {"role": "user", "content":"Answer only by yes or no."},
     ])
 
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
@@ -66,6 +67,9 @@ for item in tqdm(data, "Generation loop:"):
     results.append({
         'id_original': item['id_original'],
         'gold':item['label'],
+        'turns':turns, 
+        'seed_phs':seed_phs,
+        'subs':subs,
         'outputs':tokenizer.decode(outputs[0]),
         'duration': time.time() - start_time
     })
