@@ -58,8 +58,10 @@ def run(k):
         accelerator="gpu", devices=8, strategy="deepspeed_stage_2", precision=16,
     )
 
-
-    trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
+    try:
+        trainer.fit(model=model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
+    except:
+        pass
     model.model.save_pretrained(result_path)
 
     monitor.set_time('training')
