@@ -15,7 +15,7 @@ LEARNING_RATE = 1e-5
 PATIENCE = 5
 MAX_LEN = 125
 MODEL_NAME = "cardiffnlp/twitter-roberta-large-2022-154m"
-RESULT_PATH = Path('results/cardiff_epic_mcc')
+RESULT_PATH = Path('results/cardiff_epic_mcc_high')
 
 if not RESULT_PATH.is_dir():
     RESULT_PATH.mkdir()

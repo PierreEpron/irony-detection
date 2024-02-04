@@ -52,7 +52,7 @@ def make_line(values:pd.DataFrame, equality, cleaning, emojis, new_labels):
     
     return line
 
-def make_dataset(dataset, n_annotators:int = None, equality = False, cleaning:list = ['n'], emojis:str = ' ', new_labels:list = [0,1]) -> pd.DataFrame:
+def make_dataset(dataset, n_annotators:int = None, equality = False, min_agreement=.9, cleaning:list = ['n'], emojis:str = ' ', new_labels:list = [0,1]) -> pd.DataFrame:
     """
         Returns a dataset of Post/Reply pairs with a 1 (irony) or 0 (not irony) label.
 
@@ -78,7 +78,8 @@ def make_dataset(dataset, n_annotators:int = None, equality = False, cleaning:li
         line = None #reset line
 
         if not n_annotators or (n_annotators and len(values.label)>=n_annotators): #if no amount of min annotators is provided OR an amount of min annotators is provided and respected
-            line = make_line(values, equality, cleaning, emojis, new_labels) #attempts to create a line
+            if  max((values.labels == 'iro').sum(), (values.labels == 'not').sum()) / len(values.labels) >= min_agreement:
+                line = make_line(values, equality, cleaning, emojis, new_labels) #attempts to create a line
 
         if line: #if a line was created
             tab.append(line)
