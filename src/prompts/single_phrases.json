@@ -1,0 +1,23 @@
+{
+    "labels": [
+        {"text": "yes or no", "values":["no", "yes"]}
+    ],
+    "system": [
+        {"text": "You are a helpful assistant."}
+    ],
+    "user": [
+        {"text": "{question}{format}"}
+    ],
+    "assistant": [
+        {"text": "The answer is"}
+    ],
+    "input": [
+        {"text":": {text}\n\n"}
+    ],
+    "question": [
+        {"text": "Classify the following tweet: {input} as ironic or not."}
+    ],
+    "format": [
+        {"text": "Answer by {labels}."}
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "labels": [
+        {"text": "yes or no", "values":["no", "yes"]}
+    ],
+    "system": [
+        {"text": "You are a helpful assistant."}
+    ],
+    "user": [
+        {"text": "{intro}{question}{format}"}
+    ],
+    "assistant": [
+        {"text": "The answer is"}
+    ],
+    "intro": [  
+        {"text": "Below is a dialogue between user A and user B.\n\n{input}"}
+    ],
+    "input": [
+        {"text": "User A:{parent_text}\nUser B:{text}\n\n"}
+    ],
+    "question": [
+        {"text": "Is B's answer to A ironic?"}
+    ],
+    "format": [
+        {"text": "Answer by {labels}."}
+    ]
+}
