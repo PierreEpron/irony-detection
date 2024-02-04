@@ -16,7 +16,7 @@ PATIENCE = 5
 MAX_LEN = 125
 MODEL_NAME = "cardiffnlp/twitter-roberta-large-2022-154m"
 
-RESULT_PATH = Path('results/cardiff_tweeteval_mcc')
+RESULT_PATH = Path('results/cardiff_tweeteval_mcc_sgl')
 
 if not RESULT_PATH.is_dir():
     RESULT_PATH.mkdir()

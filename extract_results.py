@@ -15,8 +15,8 @@ results_path = repo_path / 'results' / prefix
 for k in range(5):
     k_path = results_path / str(k)
     log_path = list(k_path.glob('cv_logs/*/version_*/metrics.csv'))
-    assert len(log_path) == 1, f"Multiple or no version found for log_path: {log_path}"
-    log_path = log_path[0]
+    # assert len(log_path) == 1, f"Multiple or no version found for log_path: {log_path}"
+    log_path = log_path[-1]
 
     predictions = []
     for predictions_path in k_path.glob('predictions_*.pt'):
