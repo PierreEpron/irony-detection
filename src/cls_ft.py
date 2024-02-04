@@ -157,9 +157,9 @@ def compute_2d_mcc_loss(x, y):
     # return mcc(x[..., 1], y)
 
 def compute_1d_mcc_loss(x, y):
-    ''' Compute mcc loss on each logits and average them '''
+    ''' Compute mcc loss on 1 logits'''
     mcc = MCCLoss()
-    return mcc(x, y)
+    return mcc(x[..., 1], y.float())
 
 
 class MCCLoss(torch.nn.Module):
