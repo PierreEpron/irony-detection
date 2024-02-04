@@ -1,12 +1,21 @@
 {
     "labels": [
-        {"text": "Yes or No", "values":["No", "Yes"]}
+        {"text": "yes or no", "values":["No", "Yes"]}
     ],
     "system": [
-        {"text": "You are an expert annotator in linguistics. You are participating in an annotation project on irony. Answer the questions asked as clearly as possible."}
+        {"text": "You are a helpful assistant"}
     ],
     "user": [
-        {"text": "Do you think that the following tweet: \"{text}\" is ironic?"}
+        {"text": "{question}{format}"}
+    ],
+    "input": [
+        {"text":": {text}\n\n"}
+    ],
+    "question": [
+        {"text": "Classify the following tweet: {input} as ironic or not."}
+    ],
+    "format": [
+        {"text": "Answer only by {labels}."}
     ]
 }
 

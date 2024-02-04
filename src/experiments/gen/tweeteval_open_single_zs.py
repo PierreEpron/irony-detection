@@ -62,14 +62,11 @@ for item in tqdm(data, "Generation loop:"):
 
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
     outputs = generate(model, inputs)
-    
 
     results.append({
         'id_original': item['id_original'],
         'gold':item['label'],
         'turns':turns, 
-        'seed_phs':seed_phs,
-        'subs':subs,
         'outputs':tokenizer.decode(outputs[0]),
         'duration': time.time() - start_time
     })

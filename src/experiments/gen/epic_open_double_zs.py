@@ -55,9 +55,6 @@ for item in tqdm(data, "Generation loop:"):
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
     outputs = generate(model, inputs)
 
-    inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
-    outputs = generate(model, inputs)
-
     turns.extend([
         {"role": "assistant", "content":tokenizer.decode(outputs[0][inputs.shape[-1]:], skip_special_tokens=True)},
         {"role": "user", "content":"Answer only by yes or no."},
@@ -65,11 +62,11 @@ for item in tqdm(data, "Generation loop:"):
 
     inputs = tokenizer.apply_chat_template(turns, return_tensors='pt').to(model.device)
     outputs = generate(model, inputs)
-    
 
     results.append({
         'id_original': item['id_original'],
         'gold':item['label'],
+        'turns':turns, 
         'outputs':tokenizer.decode(outputs[0]),
         'duration': time.time() - start_time
     })
