@@ -20,7 +20,7 @@ PATIENCE = 5
 
 
 PROMPT_TEMPLATE = Path('src/prompts/llama_single_prompt.txt').read_text()
-RESULT_PATH = Path('results/llama7b_tweeteval')
+RESULT_PATH = Path('results/llama7b_tweeteval_last')
 
 # peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=64, lora_alpha=128, lora_dropout=0.1)
 
