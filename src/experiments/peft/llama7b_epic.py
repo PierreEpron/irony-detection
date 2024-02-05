@@ -22,8 +22,14 @@ PATIENCE = 5
 PROMPT_TEMPLATE = Path('src/prompts/llama_double_prompt.txt').read_text()
 RESULT_PATH = Path('results/llama7b_epic')
 
-peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=64, lora_alpha=128, lora_dropout=0.1)
-
+peft_config = LoraConfig(
+    lora_alpha=8,
+    lora_dropout=0.1,
+    r=64,
+    bias="none",
+    task_type="CAUSAL_LM",
+	target_modules = ["q_proj", "v_proj"]
+)
 
 monitor = MonitoringMetrics()
 
