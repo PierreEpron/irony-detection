@@ -100,7 +100,7 @@ class CLMFineTuner(LightningModule):
         Finetuner used for peft experiments.
     '''
 
-    def __init__(self, base_model_name, hf_token, peft_config, eos_token_id, learning_rate=3e-2):
+    def __init__(self, base_model_name, hf_token, peft_config, eos_token_id, learning_rate=2e-4):
         super().__init__()
         self.peft_config = peft_config
         self.eos_token_id = eos_token_id
