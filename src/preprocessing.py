@@ -52,7 +52,7 @@ def make_line(values:pd.DataFrame, equality, cleaning, emojis, new_labels):
     
     return line
 
-def make_dataset(dataset, n_annotators:int = None, equality = False, min_agreement=.9, cleaning:list = ['n'], emojis:str = ' ', new_labels:list = [0,1]) -> pd.DataFrame:
+def make_dataset(dataset, n_annotators:int = None, equality = False, min_agreement=0, cleaning:list = ['n'], emojis:str = ' ', new_labels:list = [0,1]) -> pd.DataFrame:
     """
         Returns a dataset of Post/Reply pairs with a 1 (irony) or 0 (not irony) label.
 
