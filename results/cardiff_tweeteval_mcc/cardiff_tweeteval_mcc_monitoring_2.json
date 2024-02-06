@@ -1,0 +1,1 @@
+{"times": {"preprocessing": 3.4807465076446533, "training": 516.5288908481598, "predicting": 3.0024254322052}, "sizes": {"train": 2861, "val": 955, "test": 784}}}}
