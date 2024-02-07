@@ -60,7 +60,7 @@ class ScriptArguments:
     do_eval: Optional[bool] = field(default=True, metadata="whether to run evaluation on the validation set or not.")
     evaluation_strategy: Optional[str] = field(default="epoch", metadata="The evaluation strategy to adopt during training.")
     load_best_model_at_end: Optional[bool] = field(default=True, metadata="whether or not to load the best model found during training at the end of training.")
-
+    save_strategy: Optional[str] = field(default="epoch", metadata="The checkpoint save strategy to adopt during training.")
 
 script_args = ScriptArguments()
 
@@ -127,6 +127,7 @@ training_args = TrainingArguments(
     push_to_hub=script_args.push_to_hub,
     hub_model_id=script_args.hub_model_id,
     load_best_model_at_end=script_args.load_best_model_at_end,
+    save_strategy=script_args.save_strategy,
 )
 
 
