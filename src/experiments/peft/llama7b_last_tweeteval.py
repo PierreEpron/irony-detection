@@ -110,68 +110,75 @@ torch_dtype = torch.bfloat16
 device_map = {"": 0}
 
 
-training_args = TrainingArguments(
-    output_dir=script_args.output_dir,
-    do_eval=script_args.do_eval,
-    evaluation_strategy=script_args.evaluation_strategy,
-    per_device_train_batch_size=script_args.batch_size,
-    per_device_eval_batch_size=script_args.batch_size,
-    gradient_accumulation_steps=script_args.gradient_accumulation_steps,
-    learning_rate=script_args.learning_rate,
-    logging_steps=script_args.logging_steps,
-    num_train_epochs=script_args.num_train_epochs,
-    max_steps=script_args.max_steps,
-    report_to=script_args.log_with,
-    save_steps=script_args.save_steps,
-    save_total_limit=script_args.save_total_limit,
-    push_to_hub=script_args.push_to_hub,
-    hub_model_id=script_args.hub_model_id,
-    load_best_model_at_end=script_args.load_best_model_at_end,
-    save_strategy=script_args.save_strategy,
-)
+# training_args = TrainingArguments(
+#     output_dir=script_args.output_dir,
+#     do_eval=script_args.do_eval,
+#     evaluation_strategy=script_args.evaluation_strategy,
+#     per_device_train_batch_size=script_args.batch_size,
+#     per_device_eval_batch_size=script_args.batch_size,
+#     gradient_accumulation_steps=script_args.gradient_accumulation_steps,
+#     learning_rate=script_args.learning_rate,
+#     logging_steps=script_args.logging_steps,
+#     num_train_epochs=script_args.num_train_epochs,
+#     max_steps=script_args.max_steps,
+#     report_to=script_args.log_with,
+#     save_steps=script_args.save_steps,
+#     save_total_limit=script_args.save_total_limit,
+#     push_to_hub=script_args.push_to_hub,
+#     hub_model_id=script_args.hub_model_id,
+#     load_best_model_at_end=script_args.load_best_model_at_end,
+#     save_strategy=script_args.save_strategy,
+# )
 
 
-peft_config = LoraConfig(
-    r=script_args.peft_lora_r,
-    lora_alpha=script_args.peft_lora_alpha,
-    bias="none",
-    task_type="CAUSAL_LM",
-)
+# peft_config = LoraConfig(
+#     r=script_args.peft_lora_r,
+#     lora_alpha=script_args.peft_lora_alpha,
+#     bias="none",
+#     task_type="CAUSAL_LM",
+# )
 
+
+# model = AutoModelForCausalLM.from_pretrained(
+#     script_args.model_name,
+#     quantization_config=quantization_config,
+#     device_map=device_map,
+#     trust_remote_code=script_args.trust_remote_code,
+#     torch_dtype=torch_dtype,
+#     token=config['HF_TOKEN']
+# )
+
+# model.config.pad_token_id = tokenizer.pad_token_id
+
+# early_stop = EarlyStoppingCallback(
+#     script_args.early_stopping_patience,
+#     script_args.early_stopping_threshold
+# )
+
+# trainer = SFTTrainer(
+#     model=model,
+#     args=training_args,
+#     max_seq_length=script_args.seq_length,
+#     train_dataset=train_set,
+#     eval_dataset=val_set,
+#     dataset_text_field=script_args.dataset_text_field,
+#     peft_config=peft_config,
+#     callbacks=[early_stop]
+# )
+
+
+# trainer.train()
+# trainer.save_model(training_args.output_dir)
+# trainer.save_state(training_args.output_dir)
 
 model = AutoModelForCausalLM.from_pretrained(
-    script_args.model_name,
+    script_args.output_dir,
     quantization_config=quantization_config,
     device_map=device_map,
     trust_remote_code=script_args.trust_remote_code,
     torch_dtype=torch_dtype,
     token=config['HF_TOKEN']
 )
-
-model.config.pad_token_id = tokenizer.pad_token_id
-
-early_stop = EarlyStoppingCallback(
-    script_args.early_stopping_patience,
-    script_args.early_stopping_threshold
-)
-
-trainer = SFTTrainer(
-    model=model,
-    args=training_args,
-    max_seq_length=script_args.seq_length,
-    train_dataset=train_set,
-    eval_dataset=val_set,
-    dataset_text_field=script_args.dataset_text_field,
-    peft_config=peft_config,
-    callbacks=[early_stop]
-)
-
-
-trainer.train()
-trainer.save_model(training_args.output_dir)
-trainer.save_state(training_args.output_dir)
-
-model.eval()
 
 results = []
 softmax = torch.nn.Softmax(dim=-1)
