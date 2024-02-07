@@ -9,7 +9,7 @@
         {"text": "{question}{format}"}
     ],
     "assistant": [
-        {"text": "The answer is "}
+        {"text": "The answer is {text_label}"}
     ],
     "input": [
         {"text":": {text}\n\n"}
