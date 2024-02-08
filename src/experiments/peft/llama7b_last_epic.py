@@ -29,7 +29,7 @@ class ScriptArguments:
     log_with: Optional[str] = field(default=None, metadata={"help": "use 'wandb' to log with wandb"})
     learning_rate: Optional[float] = field(default=1.41e-5, metadata={"help": "the learning rate"})
     batch_size: Optional[int] = field(default=8, metadata={"help": "the batch size"})
-    seq_length: Optional[int] = field(default=125, metadata={"help": "Input sequence length"})
+    seq_length: Optional[int] = field(default=205, metadata={"help": "Input sequence length"})
     gradient_accumulation_steps: Optional[int] = field(
         default=1, metadata={"help": "the number of gradient accumulation steps"}
     )
@@ -68,7 +68,6 @@ tokenizer = AutoTokenizer.from_pretrained(script_args.model_name, token=config['
 tokenizer.add_special_tokens({'sep_token':'<SEP>', 'pad_token':'<PAD>', 'cls_token':'<CLS>', 'mask_token':'<MASK>'})
 tokenizer.use_default_system_prompt = False
 
-
 def preprocess(item, phrases):
 
     item['text_label'] = phrases['labels'][0]['values'][(item['label'])]
@@ -76,6 +75,7 @@ def preprocess(item, phrases):
     input_ids = tokenizer.apply_chat_template(turns)
     
     if len(input_ids) > script_args.seq_length:
+        DROPPED.append(len(input_ids))
         return None
 
     return {
@@ -99,9 +99,8 @@ train_set = Dataset.from_list([item for item in train_data if item])
 val_set = Dataset.from_list([item for item in val_data if item])
 test_set = Dataset.from_list([item for item in test_data if item])
 
-print(f'{len(train_set)/len(train_data)}, {len(val_set)/len(val_data)}, {len(test_set)/len(test_data)}')
-
-print(train_set[0]['text'])
+print(f'{len(train_set)} {len(train_data)} {len(train_set)/len(train_data)}, {len(val_set)} {len(val_set)/len(val_data)}, {len(test_set)} {len(test_set)/len(test_data)}')
+# print(train_set[0]['text'])
 
 quantization_config = BitsAndBytesConfig(
     load_in_8bit=script_args.load_in_8bit, load_in_4bit=script_args.load_in_4bit
