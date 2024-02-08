@@ -15,7 +15,7 @@ import torch
 
 from src.prompt import generate_turns, load_phrases
 from src.utils import load_config, write_jsonl
-from src.model import cls_load_tweeteval
+from src.model import cls_load_epic
 
 
 config = load_config()
@@ -38,7 +38,7 @@ class ScriptArguments:
     use_peft: Optional[bool] = field(default=True, metadata={"help": "Wether to use PEFT or not to train adapters"})
     trust_remote_code: Optional[bool] = field(default=True, metadata={"help": "Enable `trust_remote_code`"})
     output_dir: Optional[str] = field(
-        default="results/llama7b_last_tweeteval", metadata={"help": "the output directory"}
+        default="results/llama7b_last_epic", metadata={"help": "the output directory"}
     )
     peft_lora_r: Optional[int] = field(default=64, metadata={"help": "the r parameter of the LoRA adapters"})
     peft_lora_alpha: Optional[int] = field(default=16, metadata={"help": "the alpha parameter of the LoRA adapters"})
@@ -54,7 +54,7 @@ class ScriptArguments:
 
     
     ##### Added args #####
-    phrases_path: Optional[str] = field(default="src/prompts/single_phrases_train.json", metadata="path to find phrases used to build the prompt for training")
+    phrases_path: Optional[str] = field(default="src/prompts/double_phrases_train.json", metadata="path to find phrases used to build the prompt for training")
     early_stopping_patience: Optional[int] = field(default=5, metadata="stop training when the specified metric worsens for early_stopping_patience evaluation calls")
     early_stopping_threshold: Optional[float] = field(default=0.0, metadata="how much the specified metric must improve to satisfy early stopping conditions.")
     do_eval: Optional[bool] = field(default=True, metadata="whether to run evaluation on the validation set or not.")
@@ -71,7 +71,6 @@ tokenizer.use_default_system_prompt = False
 
 def preprocess(item, phrases):
 
-    item['text'] = item['text'].strip()
     item['text_label'] = phrases['labels'][0]['values'][(item['label'])]
     turns, _, _ = generate_turns(item, phrases)
     input_ids = tokenizer.apply_chat_template(turns)
@@ -86,7 +85,8 @@ def preprocess(item, phrases):
         'text_label': item['label'],
     }
 
-train_data, val_data, test_data = cls_load_tweeteval({})[0]
+
+train_data, val_data, test_data = list(cls_load_epic(config))[0]
 
 train_phrases, labels = load_phrases(script_args.phrases_path)
 
@@ -101,7 +101,7 @@ test_set = Dataset.from_list([item for item in test_data if item])
 
 print(f'{len(train_set)/len(train_data)}, {len(val_set)/len(val_data)}, {len(test_set)/len(test_data)}')
 
-print(train_set[0])
+print(train_set[0]['text'])
 
 quantization_config = BitsAndBytesConfig(
     load_in_8bit=script_args.load_in_8bit, load_in_4bit=script_args.load_in_4bit
@@ -110,66 +110,66 @@ torch_dtype = torch.bfloat16
 device_map = {"": 0}
 
 
-# training_args = TrainingArguments(
-#     output_dir=script_args.output_dir,
-#     do_eval=script_args.do_eval,
-#     evaluation_strategy=script_args.evaluation_strategy,
-#     per_device_train_batch_size=script_args.batch_size,
-#     per_device_eval_batch_size=script_args.batch_size,
-#     gradient_accumulation_steps=script_args.gradient_accumulation_steps,
-#     learning_rate=script_args.learning_rate,
-#     logging_steps=script_args.logging_steps,
-#     num_train_epochs=script_args.num_train_epochs,
-#     max_steps=script_args.max_steps,
-#     report_to=script_args.log_with,
-#     save_steps=script_args.save_steps,
-#     save_total_limit=script_args.save_total_limit,
-#     push_to_hub=script_args.push_to_hub,
-#     hub_model_id=script_args.hub_model_id,
-#     load_best_model_at_end=script_args.load_best_model_at_end,
-#     save_strategy=script_args.save_strategy,
-# )
+training_args = TrainingArguments(
+    output_dir=script_args.output_dir,
+    do_eval=script_args.do_eval,
+    evaluation_strategy=script_args.evaluation_strategy,
+    per_device_train_batch_size=script_args.batch_size,
+    per_device_eval_batch_size=script_args.batch_size,
+    gradient_accumulation_steps=script_args.gradient_accumulation_steps,
+    learning_rate=script_args.learning_rate,
+    logging_steps=script_args.logging_steps,
+    num_train_epochs=script_args.num_train_epochs,
+    max_steps=script_args.max_steps,
+    report_to=script_args.log_with,
+    save_steps=script_args.save_steps,
+    save_total_limit=script_args.save_total_limit,
+    push_to_hub=script_args.push_to_hub,
+    hub_model_id=script_args.hub_model_id,
+    load_best_model_at_end=script_args.load_best_model_at_end,
+    save_strategy=script_args.save_strategy,
+)
 
 
-# peft_config = LoraConfig(
-#     r=script_args.peft_lora_r,
-#     lora_alpha=script_args.peft_lora_alpha,
-#     bias="none",
-#     task_type="CAUSAL_LM",
-# )
+peft_config = LoraConfig(
+    r=script_args.peft_lora_r,
+    lora_alpha=script_args.peft_lora_alpha,
+    bias="none",
+    task_type="CAUSAL_LM",
+)
 
 
-# model = AutoModelForCausalLM.from_pretrained(
-#     script_args.model_name,
-#     quantization_config=quantization_config,
-#     device_map=device_map,
-#     trust_remote_code=script_args.trust_remote_code,
-#     torch_dtype=torch_dtype,
-#     token=config['HF_TOKEN']
-# )
+model = AutoModelForCausalLM.from_pretrained(
+    script_args.model_name,
+    quantization_config=quantization_config,
+    device_map=device_map,
+    trust_remote_code=script_args.trust_remote_code,
+    torch_dtype=torch_dtype,
+    token=config['HF_TOKEN']
+)
 
-# model.config.pad_token_id = tokenizer.pad_token_id
+model.config.pad_token_id = tokenizer.pad_token_id
 
-# early_stop = EarlyStoppingCallback(
-#     script_args.early_stopping_patience,
-#     script_args.early_stopping_threshold
-# )
+early_stop = EarlyStoppingCallback(
+    script_args.early_stopping_patience,
+    script_args.early_stopping_threshold
+)
 
-# trainer = SFTTrainer(
-#     model=model,
-#     args=training_args,
-#     max_seq_length=script_args.seq_length,
-#     train_dataset=train_set,
-#     eval_dataset=val_set,
-#     dataset_text_field=script_args.dataset_text_field,
-#     peft_config=peft_config,
-#     callbacks=[early_stop]
-# )
+trainer = SFTTrainer(
+    model=model,
+    args=training_args,
+    max_seq_length=script_args.seq_length,
+    train_dataset=train_set,
+    eval_dataset=val_set,
+    dataset_text_field=script_args.dataset_text_field,
+    peft_config=peft_config,
+    callbacks=[early_stop]
+)
 
 
-# trainer.train()
-# trainer.save_model(training_args.output_dir)
-# trainer.save_state()
+trainer.train()
+trainer.save_model(training_args.output_dir)
+trainer.save_state()
 
 model = AutoModelForCausalLM.from_pretrained(
     script_args.output_dir,

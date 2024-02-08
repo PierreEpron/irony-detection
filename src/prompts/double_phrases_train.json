@@ -9,7 +9,7 @@
         {"text": "{intro}{question} {format}"}
     ],
     "assistant": [
-        {"text": "The answer is "}
+        {"text": "The answer is {text_label}"}
     ],
     "intro": [  
         {"text": "Below is a dialogue between user A and user B.\n\n{input}"}
