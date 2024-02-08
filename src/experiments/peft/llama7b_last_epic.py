@@ -75,7 +75,6 @@ def preprocess(item, phrases):
     input_ids = tokenizer.apply_chat_template(turns)
     
     if len(input_ids) > script_args.seq_length:
-        DROPPED.append(len(input_ids))
         return None
 
     return {
