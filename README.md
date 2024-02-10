@@ -1,10 +1,20 @@
 # irony-detection
 
+## Prompt ccl
+
+- yes/no work better than true/false
+- "you are a helpful assistant" is the best system prompt atm
+- Putting input sentence after newlines seems to work better
+- No clear difference on question
+-
+
+## G5K procedure
+
 lille: oarsub -p chifflot -l "gpu=1, walltime=4:00:00" "source run.sh"
 lyon: oarsub -t exotic -p gemini -l "gpu=1, walltime=4:00:00" "source run.sh" 
 
+oarsub -t exotic -p grouille-1 -l "gpu=1, walltime=10:00:00" "source nrun.sh cls.tweeteval_bce_calibration"
 
-## G5K procedure
 
 ```
 # clone repo
